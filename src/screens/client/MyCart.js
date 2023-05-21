@@ -133,9 +133,9 @@ const MyCart = () => {
 
   const renderItem = ({ item }) => {
     return (
-      <TouchableOpacity
+      <View
         key={item.id}
-        onPress={() => navigation.navigate('ProductInfo')}
+       
         style={{
           // width: '100%',
           height: 100,
@@ -273,153 +273,10 @@ const MyCart = () => {
             </TouchableOpacity>
           </View>
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
-  // const renderProducts = (data, index) => {
-  //   return (
-  //     <TouchableOpacity
-  //       key={data.id}
-  //       onPress={() => navigation.navigate('ProductInfo')}
-  //       style={{
-  //         width: '100%',
-  //         height: 100,
-  //         marginVertical: 6,
-  //         flexDirection: 'row',
-  //         alignItems: 'center',
-  //       }}>
-  //       <View
-  //         style={{
-  //           width: '30%',
-  //           height: 100,
-  //           padding: 14,
-  //           justifyContent: 'center',
-  //           alignItems: 'center',
-  //           backgroundColor: COLOURS.backgroundLight,
-  //           borderRadius: 10,
-  //           marginRight: 22,
-  //         }}>
-  //         <Image style={{
-  //           width: 100,
-  //           height: 100,
-  //           resizeMode: 'cover',
-  //           // borderRadius: 20,
-  //           // marginRight: 10
-  //         }}
-  //           source={{
-  //             uri: 'http://192.168.43.199:8443/api/v1/getFile/f8249c906e8d4aacb946b91a5c43dda2.png'
-  //           }}
-  //         />
-  //       </View>
-  //       <View
-  //         style={{
-  //           flex: 1,
-  //           height: '100%',
-  //           justifyContent: 'space-around',
-  //         }}>
-  //         <View style={{}}>
-  //           <Text
-  //             style={{
-  //               fontSize: 14,
-  //               maxWidth: '100%',
-  //               color: COLOURS.black,
-  //               fontWeight: '600',
-  //               letterSpacing: 1,
-  //             }}>
-  //             {/* {data.product.name} */} abc
-  //           </Text>
-  //           <View
-  //             style={{
-  //               marginTop: 4,
-  //               flexDirection: 'row',
-  //               alignItems: 'center',
-  //               opacity: 0.6,
-  //             }}>
-  //             <Text
-  //               style={{
-  //                 fontSize: 14,
-  //                 fontWeight: '400',
-  //                 maxWidth: '85%',
-  //                 marginRight: 4,
-  //               }}>
-  //               {/* {data.product.outputPrice} VND */}
-  //             </Text>
-  //           </View>
-  //         </View>
-  //         <View
-  //           style={{
-  //             flexDirection: 'row',
-  //             justifyContent: 'space-between',
-  //             alignItems: 'center',
-  //           }}>
-  //           <View
-  //             style={{
-  //               flexDirection: 'row',
-  //               alignItems: 'center',
-  //             }}>
-
-  //             <TouchableOpacity
-  //               style={{
-  //                 borderRadius: 100,
-  //                 marginRight: 20,
-  //                 padding: 4,
-  //                 borderWidth: 1,
-  //                 borderColor: COLOURS.backgroundMedium,
-  //                 opacity: 0.5,
-  //               }}
-  //               onPress={() => handldeMinus(data.id, data.quantity)}
-  //             >
-  //               <MaterialCommunityIcons
-  //                 name="minus"
-  //                 style={{
-  //                   fontSize: 16,
-  //                   color: COLOURS.backgroundDark,
-  //                 }}
-  //               />
-  //             </TouchableOpacity>
-
-
-  //             <Text>{data.quantity}</Text>
-
-  //             <TouchableOpacity
-  //               style={{
-  //                 borderRadius: 100,
-  //                 marginLeft: 20,
-  //                 padding: 4,
-  //                 borderWidth: 1,
-  //                 borderColor: COLOURS.backgroundMedium,
-  //                 opacity: 0.5,
-  //               }}
-  //               onPress={() => handldePlus(data.id, data.quantity)}>
-  //               <MaterialCommunityIcons
-  //                 name="plus"
-  //                 style={{
-  //                   fontSize: 16,
-  //                   color: COLOURS.backgroundDark,
-  //                 }}
-  //               />
-  //             </TouchableOpacity>
-
-
-  //           </View>
-  //           <TouchableOpacity onPress={() => deleteC(data.cart_item_id)}>
-  //             <MaterialCommunityIcons
-  //               name="delete-outline"
-  //               style={{
-  //                 fontSize: 16,
-  //                 color: COLOURS.backgroundDark,
-  //                 backgroundColor: COLOURS.backgroundLight,
-  //                 padding: 8,
-  //                 borderRadius: 100,
-  //               }}
-  //             />
-  //           </TouchableOpacity>
-  //         </View>
-  //       </View>
-  //     </TouchableOpacity>
-  //   );
-  // };
 
   return (
     <View
@@ -536,33 +393,7 @@ const MyCart = () => {
                 {total}
               </Text>
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 8,
-              }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '400',
-                  maxWidth: '80%',
-                  color: COLOURS.black,
-                  opacity: 0.5,
-                }}>
-                Thuế
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '400',
-                  color: COLOURS.black,
-                  opacity: 0.8,
-                }}>
-                {tax}
-              </Text>
-            </View>
+          
             <View
               style={{
                 flexDirection: 'row',
@@ -612,7 +443,7 @@ const MyCart = () => {
                   fontWeight: '500',
                   color: COLOURS.black,
                 }}>
-                {total + tax}
+                {total}
               </Text>
             </View>
           </View>

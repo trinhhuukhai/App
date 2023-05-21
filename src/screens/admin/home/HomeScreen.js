@@ -14,7 +14,7 @@ const HomeScreen = () => {
     const [isLoading, setLoading] = useState(false);
     const [cus, setCus] = useState();
     const [order, setOrder] = useState();
-    const [total, setTotal] = useState();
+    const [total, setTotal] = useState(0);
     const [pro, setPro] = useState();
     const navigation = useNavigation();
 

@@ -22,7 +22,7 @@ import EditCategory from "./admin/option/category/EditCategory";
 import AddProduct from "./admin/option/product/AddProduct";
 import EditProduct from "./admin/option/product/EditProduct";
 import Account from "./admin/option/accounts/Account";
-import UsersList from "../test/UsersList";
+// import UsersList from "../test/UsersList";
 import Payment from "./client/Payment";
 import OrderClient from "./client/order/OrderClient";
 import AccountClient from "./client/account/AccountClient";
@@ -36,6 +36,7 @@ import ProductDetail from "./admin/option/product/ProductDetail";
 import Review from "./admin/option/review/Review";
 import AddReview from "./admin/option/review/AddReview";
 import EditReview from "./admin/option/review/EditReview";
+import TopupCoin from "./client/account/TopupCoin";
 export {    
     Login,
     Register,
@@ -60,7 +61,6 @@ export {
     EditCategory,
     AddProduct,
     EditProduct,
-    UsersList,
     Payment,
     OrderClient,
     AccountClient,
@@ -73,5 +73,6 @@ export {
     ProductDetail,
     Review,
     AddReview,
-    EditReview
+    EditReview,
+    TopupCoin
 }

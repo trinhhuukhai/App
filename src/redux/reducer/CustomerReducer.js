@@ -38,5 +38,28 @@ export const getOrderByIdUser = async (id) => {
   }
 };
 
+export const getWalletById= async (id) => {
+  try {
+    const response = await axios.get(`http://192.168.43.199:8443/api/v1/wallet/${id}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  
+    return null;
+  }
+};
+
+export const TopupWallet = async (id,balance) => {
+  try {
+    const response = await axios.post(`http://192.168.43.199:8443/api/v1/wallet/${id}/top-up?balance=${balance}`);
+    
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  
+    return null;
+  }
+};
+
 
 export default slice.reducer;

@@ -23,7 +23,7 @@ const Payment = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { payment } = route.params;
-    const total = payment.data.billInvoice
+    const total = payment.data.total
     const wallet = payment.data.user.wallet.balance;
     const orderId = payment.data.id;
     const [message, setMsg] = useState()
@@ -142,7 +142,7 @@ const Payment = () => {
                                 marginBottom: 10
                             }}>Số dư không đủ, vui lòng nạp thêm!!!</Text>
                             <TouchableOpacity
-
+                                onPress={() => navigation.navigate("Nạp tiền")}
                                 style={{
                                     // width: '86%',
                                     // height: '90%',

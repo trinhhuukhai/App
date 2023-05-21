@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Entypo';
 import Icons from 'react-native-vector-icons/AntDesign';
 import Iconss from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Category, Contact, MyCart, Filter, Home, Login, Orders, Register, Welcome, ProductInfo, Product, HomeScreen, Analytics, Option, ProductOfCat, AddCategory, EditCategory, AddProduct, EditProduct, Customer, Account, Payment, OrderClient, AccountClient, OrderItemList, PaymentOrder, EditAccount, ChangePassword, Details, AddCustomer, EditCustomer, ProductDetail, AddReview, EditReview } from '../screens';
+import { Category, Contact, MyCart, Filter, Home, Login, Orders, Register, Welcome, ProductInfo, Product, HomeScreen, Analytics, Option, ProductOfCat, AddCategory, EditCategory, AddProduct, EditProduct, Customer, Account, Payment, OrderClient, AccountClient, OrderItemList, PaymentOrder, EditAccount, ChangePassword, Details, AddCustomer, EditCustomer, ProductDetail, AddReview, EditReview, TopupCoin } from '../screens';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
@@ -90,6 +90,7 @@ function OrderC() {
       <StackOrderClient.Screen name={"Đơn hàng"} component={OrderClient} />
       <StackOrderClient.Screen name={"Chi tiết đơn hàng"} component={OrderItemList} />
       <StackOrderClient.Screen name={"Thanh toán"} component={PaymentOrder} />
+      <StackOrderClient.Screen name={"Nạp tiền"} component={TopupCoin} />
     </StackOrderClient.Navigator>)
 }
 
@@ -100,6 +101,7 @@ function AccountC() {
       <StackAccountC.Screen name={"Tài Khoản"} component={AccountClient} />
       <StackAccountC.Screen name={"Chỉnh sửa tài khoản"} component={EditAccount} />
       <StackAccountC.Screen name={"Đổi mật khẩu"} component={ChangePassword} />
+      <StackAccountC.Screen name={"Nạp tiền"} component={TopupCoin} />
     </StackAccountC.Navigator>)
 }
 

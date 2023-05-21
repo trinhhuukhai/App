@@ -30,7 +30,7 @@ const OrderClient = () => {
     const route = useRoute();
     const [count, setCount] = useState(0)
     const [searchText, setSearchText] = useState('')
-    const [status, setStatus] = useState('Đơn hàng hủy')
+    const [status, setStatus] = useState('Huỷ đơn hàng')
 
 
     const getData = async () => {
@@ -115,7 +115,7 @@ const OrderClient = () => {
 
                     }}
                         onPress={() => navigation.navigate('Thanh toán',{"order":item})}
-                        disabled={item.status == "Đơn hàng hủy" || item.paymentStatus == "Đã thanh toán"}
+                        disabled={item.status == "Huỷ đơn hàng" || item.paymentStatus == "Đã thanh toán" || item.paymentStatus == "Hoàn tiền"}
                     >
                         <Text style={{
                             color: 'white'
@@ -129,7 +129,7 @@ const OrderClient = () => {
                         alignItems: 'center',
                         padding: 8
                     }}
-                    disabled={item.status == "Đơn hàng hủy"}
+                    disabled={item.status == "Huỷ đơn hàng"}
                     onPress={() => cancel(item.id)}
                     >
                         <Text style={{

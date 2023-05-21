@@ -48,7 +48,7 @@ const OrderItemList = () => {
                 });
             }
 
-            setTax(total * 0.05)
+           
             setTotal(total)
             setLoading(false);
         }
@@ -250,33 +250,7 @@ const OrderItemList = () => {
                             {total}
                         </Text>
                     </View>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            marginBottom: 8,
-                        }}>
-                        <Text
-                            style={{
-                                fontSize: 12,
-                                fontWeight: '400',
-                                maxWidth: '80%',
-                                color: COLOURS.black,
-                                opacity: 0.5,
-                            }}>
-                            Thuế
-                        </Text>
-                        <Text
-                            style={{
-                                fontSize: 12,
-                                fontWeight: '400',
-                                color: COLOURS.black,
-                                opacity: 0.8,
-                            }}>
-                            {tax}
-                        </Text>
-                    </View>
+                
                     <View
                         style={{
                             flexDirection: 'row',
@@ -326,7 +300,7 @@ const OrderItemList = () => {
                                 fontWeight: '500',
                                 color: COLOURS.black,
                             }}>
-                            {total + tax}
+                            {total}
                         </Text>
                     </View>
                 </View>

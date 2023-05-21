@@ -100,7 +100,7 @@ export const confirmOrderStatus = async (id,data) => {
 export const cancelOrder = async (id,status) => {
   try {
     const response = await axios.put(`http://192.168.43.199:8443/api/v1/order/${id}/status?status=${status}`);
-    debugger
+    
     return response.data;
   } catch (error) {
     console.log(error);

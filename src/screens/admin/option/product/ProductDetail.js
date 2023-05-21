@@ -99,7 +99,7 @@ const ProductDetail = () => {
                             fontSize: 18,
                             fontWeight: 'bold'
                         }}>{data.item.content}</Text>
-                        <Start numberOfStar={data.item.rating} />
+                        {/* <Start numberOfStar={data.item.rating} /> */}
 
                     </View>
                 </View>

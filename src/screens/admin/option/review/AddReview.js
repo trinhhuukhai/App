@@ -85,14 +85,14 @@ const AddReview = () => {
                     }}
                     placeholder="Nội dung"
                 />
-                <TextInput
+                {/* <TextInput
                     onChangeText={(text) => {
                         setStar(text);
                     }}
                     style={styles.input}
                     keyboardType='numeric'
                     placeholder="Sao"
-                />
+                /> */}
 
             </View>
 

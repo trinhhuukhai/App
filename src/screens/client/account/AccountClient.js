@@ -11,21 +11,26 @@ import { COLOURS } from '../../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logout } from '../../../redux/action/AuthAction';
+import { getWalletById } from '../../../redux/reducer/CustomerReducer';
 
 const AccountClient = () => {
 
     const [isLoading, setLoading] = useState(false);
     const [user, setUser] = useState([])
     const dispatch = useDispatch()
-
+    const [wallet, setWallet] = useState(0)
     const auth = useSelector((state) => state.auth?.data);
     const token = auth.token
     const navigation = useNavigation()
     const userId = auth?.id;
-
+    const walletId = auth?.walletId
+    useEffect(() => {
+        getWallet()
+    });
     useEffect(() => {
         getData();
-    },[]);
+
+    }, []);
 
     const getData = async () => {
         const response = await getUserById(userId);
@@ -37,18 +42,35 @@ const AccountClient = () => {
         }
     };
 
-    const editUser = () =>{
-        navigation.navigate('Chỉnh sửa tài khoản',{'id':user.id})
+ 
+
+    const getWallet = async () => {
+        const response = await getWalletById(walletId);
+        setLoading(true);
+        if (response.data === '') {
+            setLoading(false);
+        } else {
+            setWallet(response.data.balance)
+            setLoading(false);
+        }
+    };
+
+    const editUser = () => {
+        navigation.navigate('Chỉnh sửa tài khoản', { 'id': user.id })
     }
 
-    const ChangePass = () =>{
-        navigation.navigate('Đổi mật khẩu',{'id':user.id})
+    const ChangePass = () => {
+        navigation.navigate('Đổi mật khẩu', { 'id': user.id })
     }
 
-    const handleLogout =  () => {
+    const Wallet = () => {
+        navigation.navigate('Nạp tiền', { 'walletId': walletId})
+    }
+
+    const handleLogout = () => {
         AsyncStorage.clear();
         logout(dispatch, token)
-        
+
         navigation.navigate('Login');
     };
 
@@ -67,7 +89,7 @@ const AccountClient = () => {
                     flexDirection: 'row',
                     paddingTop: 16,
                     paddingHorizontal: 16,
-                    marginBottom:15,
+                    marginBottom: 15,
                     // justifyContent: 'space-between',
                     alignItems: 'center',
                 }}>
@@ -142,18 +164,25 @@ const AccountClient = () => {
                                 {user.name}
                             </Text>
                             <Text style={{
-                                marginStart: 10
+                                marginStart: 10,
+                                fontSize: 16, fontWeight: 'bold'
                             }}>Địa chỉ: {user.address}</Text>
 
                             <Text style={{
-                                marginStart: 10
+                                marginStart: 10,
+                                fontSize: 16, fontWeight: 'bold'
                             }}>Số điện thoại: {user.phone}</Text>
                             <Text style={{
-                                marginStart: 10
+                                marginStart: 10,
+                                fontSize: 16, fontWeight: 'bold'
                             }}>Email: {user.email}</Text>
+                            <Text style={{
+                                marginStart: 10,
+                                fontSize: 16, fontWeight: 'bold'
+                            }}>Ví: {wallet} VND</Text>
                         </View>
                         <TouchableOpacity
-                        onPress={() => editUser()}
+                            onPress={() => editUser()}
                         >
                             <Image
                                 source={icons.icon_edit}
@@ -171,7 +200,25 @@ const AccountClient = () => {
                 </View>
             </View>
 
-            
+            <View style={{
+                // padding: 10,
+                // borderBottomWidth: 1,
+                // borderBottomColor: 'black',
+                // marginHorizontal: 10,
+                marginTop: 30
+            }}>
+                <TouchableOpacity
+                    onPress={() =>
+                        Wallet()
+                    }
+                >
+                    <Text style={{
+                        marginLeft: 20,
+                        color: 'orange'
+                    }}>Nạp tiền vào ví</Text>
+                </TouchableOpacity>
+
+            </View>
             <View style={{
                 // padding: 10,
                 // borderBottomWidth: 1,
