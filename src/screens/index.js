@@ -37,6 +37,10 @@ import Review from "./admin/option/review/Review";
 import AddReview from "./admin/option/review/AddReview";
 import EditReview from "./admin/option/review/EditReview";
 import TopupCoin from "./client/account/TopupCoin";
+import EditAcc from "./admin/option/accounts/EditAcc";
+import ChangePass from "./admin/option/accounts/ChangePass";
+import ForgotPass from "./ForgotPass";
+import ChangePassForgot from "./ChangePassForgot";
 export {    
     Login,
     Register,
@@ -74,5 +78,9 @@ export {
     Review,
     AddReview,
     EditReview,
-    TopupCoin
+    TopupCoin,
+    EditAcc,
+    ChangePass,
+    ForgotPass,
+    ChangePassForgot
 }

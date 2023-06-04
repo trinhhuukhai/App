@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, TouchableHighlight, Alert, TextInput } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { colors } from '../../../../assets';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -10,6 +10,8 @@ import { deteleProduct, getProduct, getProductByCategory, getProductByShop } fro
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLOURS } from '../../../../database/Database';
 import { useSelector } from 'react-redux';
+import Icons from 'react-native-vector-icons/AntDesign';
+
 const Product = () => {
   const [isLoading, setLoading] = useState(false);
   const [product, setProduct] = useState([]);
@@ -19,10 +21,15 @@ const Product = () => {
 
   const auth = useSelector((state) => state.auth?.data);
   const shopId = auth?.shopId;
+  const isFocused = useIsFocused()
+
 
   useEffect(() => {
-    getData();
-  }, []);
+    if (isFocused) {
+      getData();
+    }
+
+  }, [isFocused]);
 
   const getData = async () => {
     setLoading(true);
@@ -57,23 +64,31 @@ const Product = () => {
     getData()
   };
 
-
+  const formattedAmount = (amount) => {
+    if (amount) {
+      return amount.toLocaleString('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      });
+    }
+    return '';
+  };
 
   const editPro = (proId) => {
     // Navigate to the OrderDetail screen with the orderId
-    navigation.navigate('Sửa Sản Phẩm', { id: proId });
+    navigation.navigate('SUASP', { id: proId });
 
   }
 
   const viewProductDetail = (proId) => {
     // Navigate to the OrderDetail screen with the orderId
-    navigation.navigate('Chi tiết sản phẩm', { "proId": proId });
+    navigation.navigate('CTSP', { "proId": proId });
 
   }
 
   const addPro = () => {
     // Navigate to the OrderDetail screen with the orderId
-    navigation.navigate('Thêm Sản Phẩm');
+    navigation.navigate('THEMSP');
   }
 
   const onRowDidOpen = rowKey => {
@@ -89,10 +104,11 @@ const Product = () => {
       borderBottomWidth: 1,
       zIndex: 10,
       backgroundColor: 'white',
-      opacity:10
+      opacity: 10,
+      // width:"90%"
 
     }}
-    onPress={() => viewProductDetail(data.item.id)}
+      onPress={() => viewProductDetail(data.item.id)}
     >
       <View style={{
         backgroundColor: 'white'
@@ -106,7 +122,7 @@ const Product = () => {
           // marginRight: 10
         }}
           source={{
-            uri: 'http://192.168.43.199:8443/api/v1/getFile/f8249c906e8d4aacb946b91a5c43dda2.png'
+            uri: data.item.productImage
           }}
         />
       </View>
@@ -117,31 +133,52 @@ const Product = () => {
         >
 
           <View>
-            <Text style={{
-              color: 'green',
-              fontSize: 18,
-              fontWeight: 'bold'
-            }}>{data.item.name}</Text>
+            <Text
+              numberOfLines={1} ellipsizeMode="tail"
+              style={{
+                color: 'green',
+                fontSize: 18,
+                fontWeight: '500',
+                letterSpacing: 1,
+              }}>{data.item.name}</Text>
             <Text style={{
               color: 'black',
               fontSize: 14,
-              fontWeight: 'bold'
+              fontWeight: '500',
+              letterSpacing: 1,
             }}>Số lượng: {data.item.inventory} chiếc</Text>
             <Text style={{
               color: 'black',
               fontSize: 14,
-              fontWeight: 'bold'
+              fontWeight: '500',
+              letterSpacing: 1,
             }}>Đã bán: {data.item.sold} chiếc</Text>
             <Text style={{
               color: 'black',
               fontSize: 14,
-              fontWeight: 'bold'
-            }}>Giá nhập: {data.item.inputPrice} VND</Text>
+              fontWeight: '500',
+              letterSpacing: 1,
+            }}>
+              Size: {Array.isArray(data.item.sizes) && data.item.sizes.map((i, index) => (
+                <React.Fragment key={i.sizeName}>
+                  {index !== 0 && ', '}
+                  {i.sizeName}
+                </React.Fragment>
+              ))}
+            </Text>
+
             <Text style={{
               color: 'black',
               fontSize: 14,
-              fontWeight: 'bold'
-            }}>Giá bán: {data.item.outputPrice} VND</Text>
+              fontWeight: '500',
+              letterSpacing: 1,
+            }}>Giá nhập: {formattedAmount(data.item.inputPrice)}</Text>
+            <Text style={{
+              color: 'black',
+              fontSize: 14,
+              fontWeight: '500',
+              letterSpacing: 1,
+            }}>Giá bán: {formattedAmount(data.item.outputPrice)}</Text>
           </View>
         </View>
       </View>
@@ -164,7 +201,8 @@ const Product = () => {
           closeRow(rowMap, data.item.id);
         }}
       >
-        <Text style={styles.backTextWhite}>Sửa</Text>
+        <Icons name="edit" color="blue" size={30} />
+
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnRight]}
@@ -173,7 +211,7 @@ const Product = () => {
           closeRow(rowMap, data.item.id);
         }}
       >
-        <Text style={styles.backTextWhite}>Xóa</Text>
+        <Icons name="delete" color="red" size={30} />
       </TouchableOpacity>
     </View>
   );
@@ -272,14 +310,14 @@ const Product = () => {
         data={product?.filter(item => item.name?.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item.name)?.toLowerCase().includes(searchText.toLowerCase()))}
         renderItem={renderItem}
         renderHiddenItem={renderHiddenItem}
-        rightOpenValue={-150}
+        rightOpenValue={-250}
         previewRowKey={'0'}
         previewOpenValue={-40}
         previewOpenDelay={3000}
         onRowDidOpen={onRowDidOpen}
       />
       <View style={{
-        position: 'absolute', 
+        position: 'absolute',
         bottom: 40,
         right: 20,
 
@@ -392,9 +430,6 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'white',
 
-    // borderBottomWidth: 1,
-    // justifyContent: 'center',
-    // height: 50,
   },
   rowBack: {
     alignItems: 'center',
@@ -409,18 +444,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     position: 'absolute',
-    top: 0,
+    top: "50%",
     width: 75,
+    height: '20%'
 
 
   },
   backRightBtnRight: {
     // backgroundColor: 'colors.primary',
     right: 0,
-    backgroundColor: 'red'
+    // backgroundColor: 'red'
   },
   backRightBtnLeft: {
-    backgroundColor: 'blue',
+    // backgroundColor: 'blue',
     right: 75,
+    borderRightWidth: 1,
+    // height:'20%'
   },
 })

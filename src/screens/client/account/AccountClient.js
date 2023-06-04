@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Spinner from 'react-native-loading-spinner-overlay/lib';
 import { colors } from '../../../constants';
 import images from '../../../constants';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { getUserById } from '../../../redux/reducer/AuthReducer';
 import { icons } from '../../../constants';
@@ -24,15 +24,20 @@ const AccountClient = () => {
     const navigation = useNavigation()
     const userId = auth?.id;
     const walletId = auth?.walletId
-    useEffect(() => {
-        getWallet()
-    });
-    useEffect(() => {
-        getData();
+    const isFocused = useIsFocused()
 
-    }, []);
+
+
+    useEffect(() => {
+        if (isFocused) {
+            getData();
+            getWallet()
+        }
+
+    }, [isFocused]);
 
     const getData = async () => {
+        setLoading(true);
         const response = await getUserById(userId);
         if (response.data === '') {
             setLoading(false);
@@ -42,10 +47,14 @@ const AccountClient = () => {
         }
     };
 
- 
+
+    // useEffect(() => {
+    //     getWallet()
+    // }, [isFocused]);
 
     const getWallet = async () => {
         const response = await getWalletById(walletId);
+        
         setLoading(true);
         if (response.data === '') {
             setLoading(false);
@@ -64,7 +73,7 @@ const AccountClient = () => {
     }
 
     const Wallet = () => {
-        navigation.navigate('Nạp tiền', { 'walletId': walletId})
+        navigation.navigate('Nạp tiền', { 'walletId': walletId })
     }
 
     const handleLogout = () => {
@@ -72,6 +81,16 @@ const AccountClient = () => {
         logout(dispatch, token)
 
         navigation.navigate('Login');
+    };
+
+    const formattedAmount = (amount) => {
+        if (amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+            });
+        }
+        return '0đ';
     };
 
     return (
@@ -82,7 +101,7 @@ const AccountClient = () => {
                 backgroundColor: COLOURS.white,
                 position: 'relative',
             }}>
-
+            <Spinner color='#00ff00' size={"large"} visible={isLoading} />
             <View
                 style={{
                     width: '100%',
@@ -127,6 +146,8 @@ const AccountClient = () => {
                 }}
             >
             </View>
+
+
             <View>
                 <View
                     style={{
@@ -158,28 +179,18 @@ const AccountClient = () => {
                             <Text
                                 style={{
                                     marginStart: 10,
-                                    fontSize: 18,
-                                    fontWeight: 'bold'
+                                    fontSize: 20,
+                                    fontWeight: '500',
+                                    letterSpacing: 1,
+                                    color: "green"
                                 }}>
                                 {user.name}
                             </Text>
-                            <Text style={{
-                                marginStart: 10,
-                                fontSize: 16, fontWeight: 'bold'
-                            }}>Địa chỉ: {user.address}</Text>
+                            <Text style={styles.text}>Địa chỉ: {user.address}</Text>
 
-                            <Text style={{
-                                marginStart: 10,
-                                fontSize: 16, fontWeight: 'bold'
-                            }}>Số điện thoại: {user.phone}</Text>
-                            <Text style={{
-                                marginStart: 10,
-                                fontSize: 16, fontWeight: 'bold'
-                            }}>Email: {user.email}</Text>
-                            <Text style={{
-                                marginStart: 10,
-                                fontSize: 16, fontWeight: 'bold'
-                            }}>Ví: {wallet} VND</Text>
+                            <Text style={styles.text}>Số điện thoại: {user.phone}</Text>
+                            <Text style={styles.text}>Email: {user.email}</Text>
+                            <Text style={styles.text}>Ví: {formattedAmount(wallet)}</Text>
                         </View>
                         <TouchableOpacity
                             onPress={() => editUser()}
@@ -214,7 +225,9 @@ const AccountClient = () => {
                 >
                     <Text style={{
                         marginLeft: 20,
-                        color: 'orange'
+                        color: 'orange',
+                        fontWeight: '500',
+                        letterSpacing: 1,
                     }}>Nạp tiền vào ví</Text>
                 </TouchableOpacity>
 
@@ -233,7 +246,9 @@ const AccountClient = () => {
                 >
                     <Text style={{
                         marginLeft: 20,
-                        color: 'orange'
+                        color: 'orange',
+                        fontWeight: '500',
+                        letterSpacing: 1,
                     }}>Đổi mật khẩu</Text>
                 </TouchableOpacity>
 
@@ -253,7 +268,9 @@ const AccountClient = () => {
                 >
                     <Text style={{
                         marginLeft: 20,
-                        color: 'orange'
+                        color: 'orange',
+                        fontWeight: '500',
+                        letterSpacing: 1,
                     }}>Đăng xuất</Text>
                 </TouchableOpacity>
 
@@ -264,4 +281,11 @@ const AccountClient = () => {
 
 export default AccountClient
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    text: {
+        fontWeight: '500',
+        letterSpacing: 1,
+        marginStart: 10,
+        fontSize: 16,
+    }
+})

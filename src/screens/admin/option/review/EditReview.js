@@ -1,54 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { colors } from '../../../../assets';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { editCategory, getCategoryId } from '../../../../redux/reducer/CategoryReducer';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLOURS } from '../../../../database/Database';
-import { getReviewById } from '../../../../redux/reducer/ReviewReducer';
+import { editReviewPro, getReviewById } from '../../../../redux/reducer/ReviewReducer';
 const EditReview = () => {
 
     const [loading, setLoading] = useState(false);
     const [content, setContent] = useState("")
-    const [start, setStar] = useState("")
+    const [productId, setProductId] = useState("")
+    const [userId, setUserId] = useState("")
 
     const navigation = useNavigation();
     const route = useRoute();
     const { id } = route.params;
-    useEffect(() => {
+    const isFocused = useIsFocused()
 
-        getData(id);
-    }, []);
+
+
+    useEffect(() => {
+        if (isFocused) {
+            getData(id);
+        }
+
+    }, [isFocused]);
 
     const getData = async (id) => {
         setLoading(true);
         const response = await getReviewById(id);
         
         if (response.data === '') {
+
             setLoading(false);
+            setContent("");
+            setUserId("")
+            setProductId("")
         } else {
             setContent(response.data.content);
-            setStar(response.data.rating);
+            setUserId(response.data.user.id)
+            setProductId(response.data.product.id)
             setLoading(false);
         }
     };
 
-    const handldePost = () => {
-        const newCat = {
-            name: name,
-        }
+    const handleEdit = async () => {
+        setLoading(true)
+        const newReview = {
+          content,
+          productId,
+          userId
+        };
+    
+        await editReviewPro(id, newReview)
+        setLoading(false)
+        navigation.goBack()
 
-        editCategory(id, newCat)
-
-
-    }
-
-    const viewCate = () => {
-        // Navigate to the OrderDetail screen with the orderId
-        navigation.navigate('Danh Mục');
-    }
+      };
 
     return (
         <View
@@ -110,23 +121,6 @@ const EditReview = () => {
                     value={content}
                     placeholder="Nội dung"
                 />
-                <TextInput
-                    onChangeText={text => {
-                        setStar(text);
-                    }}
-                    style={{
-                        // backgroundColor:'red',
-                        height: 40,
-                        marginTop: 10,
-                        borderBottomWidth: 1,
-                        // color: 'red',
-                        // marginBottom: 30
-                    }}
-                    value={start}
-                    keyboardType='numeric'
-                    placeholder="Sao"
-
-                />
 
             </View>
 
@@ -134,10 +128,7 @@ const EditReview = () => {
             <TouchableOpacity
 
                 onPress={() => {
-
-                    handldePost()
-                    Alert.alert("thanh cong")
-                    navigation.goBack()
+                    handleEdit()
                 }}
                 style={{
                     backgroundColor: colors.primary,

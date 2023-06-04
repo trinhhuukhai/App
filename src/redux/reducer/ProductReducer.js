@@ -36,6 +36,18 @@ export const getProductByCategory= async (id) => {
   }
 };
 
+
+export const seachProduct= async (name) => {
+  try {
+    const response = await axios.get(`http://192.168.43.199:8443/api/v1/product/search?name=${name}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  
+    return null;
+  }
+};
+
 export const getProductByShop= async (id) => {
   try {
     const response = await axios.get(`http://192.168.43.199:8443/api/v1/shop/${id}/product`);

@@ -4,11 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Entypo';
 import Icons from 'react-native-vector-icons/AntDesign';
 import Iconss from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Category, Contact, MyCart, Filter, Home, Login, Orders, Register, Welcome, ProductInfo, Product, HomeScreen, Analytics, Option, ProductOfCat, AddCategory, EditCategory, AddProduct, EditProduct, Customer, Account, Payment, OrderClient, AccountClient, OrderItemList, PaymentOrder, EditAccount, ChangePassword, Details, AddCustomer, EditCustomer, ProductDetail, AddReview, EditReview, TopupCoin } from '../screens';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';
-import jwtDecode from 'jwt-decode';
+import { Category, Contact, MyCart, Filter, Home, Login, Orders, Register, Welcome, ProductInfo, Product, HomeScreen, Analytics, Option, ProductOfCat, AddCategory, EditCategory, AddProduct, EditProduct, Customer, Account, Payment, OrderClient, AccountClient, OrderItemList, PaymentOrder, EditAccount, ChangePassword, Details, AddCustomer, EditCustomer, ProductDetail, AddReview, EditReview, TopupCoin, EditAcc, ChangePass, ForgotPass, ChangePassForgot } from '../screens';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -16,122 +13,121 @@ const StackOrder = createNativeStackNavigator();
 function DH() {
   return (
     <StackOrder.Navigator screenOptions={{ headerShown: false }}>
-      <StackOrder.Screen name={"Đơn Hàng"} component={Orders} />
-      <StackOrder.Screen name={"Details"} component={Details} />
-    </StackOrder.Navigator>)
+      <StackOrder.Screen name={"DH"} component={Orders} />
+      <StackOrder.Screen name={"CTDH"} component={Details} />
+    </StackOrder.Navigator>
+  );
 }
 
 const StackOption = createNativeStackNavigator();
 function TuyChon() {
   return (
     <StackOption.Navigator screenOptions={{ headerShown: false }}>
-      <StackOption.Screen name={"Tùy Chọn"} component={Option} />
-      <StackOption.Screen name={"Danh Mục"} component={Cate} />
-      <StackOption.Screen name={"Sản Phẩm"} component={Prod} />
-      <StackOption.Screen name={"Khách Hàng"} component={Customers} />
-      <StackOption.Screen name={"Tài Khoản"} component={Account} />
-    </StackOption.Navigator>)
+      <StackOption.Screen name={"TC"} component={Option} />
+      {/* <StackOption.Screen name={"DM"} component={Cate} /> */}
+      <StackOption.Screen name={"SP"} component={Prod} />
+      <StackOption.Screen name={"KH"} component={Customers} />
+      <StackOption.Screen name={"TKOPTION"} component={TKOWNER} />
+    </StackOption.Navigator>
+  );
 }
 
-
-const Stackcat = createNativeStackNavigator();
-function Cate() {
+const StackTKO = createNativeStackNavigator();
+function TKOWNER() {
   return (
-    <Stackcat.Navigator screenOptions={{ headerShown: false }}>
-      <Stackcat.Screen name={"Danh Mục"} component={Category} />
-      <Stackcat.Screen name={"Thêm Danh Mục"} component={AddCategory} />
-      <Stackcat.Screen name={"Sản Phẩm Danh Mục"} component={ProductOfCat} />
-      <Stackcat.Screen name={"Sửa Danh Mục"} component={EditCategory} />
-    </Stackcat.Navigator>)
+    <StackTKO.Navigator screenOptions={{ headerShown: false }}>
+      <StackTKO.Screen name={"TKOWNER"} component={Account} />
+      <StackTKO.Screen name={"EDITTKOWNER"} component={EditAcc} />
+      <StackTKO.Screen name={"CHANGEPASSOWNER"} component={ChangePass} />
+    </StackTKO.Navigator>
+  );
 }
+
+// const Stackcat = createNativeStackNavigator();
+// function Cate() {
+//   return (
+//     <Stackcat.Navigator screenOptions={{ headerShown: false }}>
+//       <Stackcat.Screen name={"Danh Mục"} component={Category} />
+//       <Stackcat.Screen name={"Thêm Danh Mục"} component={AddCategory} />
+//       <Stackcat.Screen name={"Sản Phẩm Danh Mục"} component={ProductOfCat} />
+//       <Stackcat.Screen name={"Sửa Danh Mục"} component={EditCategory} />
+//     </Stackcat.Navigator>
+//   );
+// }
 
 const Stackpro = createNativeStackNavigator();
 function Prod() {
   return (
     <Stackpro.Navigator screenOptions={{ headerShown: false }}>
-      <Stackpro.Screen name={"Sản Phẩm"} component={Product} />
-      <Stackpro.Screen name={"Thêm Sản Phẩm"} component={AddProduct} />
-      <Stackpro.Screen name={"Sửa Sản Phẩm"} component={EditProduct} />
-      <Stackpro.Screen name={"Chi tiết sản phẩm"} component={ProductDetail} />
-      <Stackpro.Screen name={"Thêm đánh giá"} component={AddReview} />
-      <Stackpro.Screen name={"Sửa đánh giá"} component={EditReview} />
-
-    </Stackpro.Navigator>)
+      <Stackpro.Screen name={"SPh"} component={Product} />
+      <Stackpro.Screen name={"THEMSP"} component={AddProduct} />
+      <Stackpro.Screen name={"SUASP"} component={EditProduct} />
+      <Stackpro.Screen name={"CTSP"} component={ProductDetail} />
+      <Stackpro.Screen name={"THEMDG"} component={AddReview} />
+      <Stackpro.Screen name={"SUADG"} component={EditReview} />
+    </Stackpro.Navigator>
+  );
 }
-
-
-
 
 const Stackaccount = createNativeStackNavigator();
 function Customers() {
   return (
     <Stackaccount.Navigator screenOptions={{ headerShown: false }}>
-      <Stackaccount.Screen name={"Tài khoản khách hàng"} component={Customer} />
-      <Stackaccount.Screen name={"Thêm tài khoản"} component={AddCustomer} />
-      <Stackaccount.Screen name={"Sửa tài khoản"} component={EditCustomer} />
-    </Stackaccount.Navigator>)
+      <Stackaccount.Screen name={"TKCUSTOMER"} component={Customer} />
+      <Stackaccount.Screen name={"ADDTK"} component={AddCustomer} />
+      <Stackaccount.Screen name={"EDITTK"} component={EditCustomer} />
+    </Stackaccount.Navigator>
+  );
+}
+
+const StackHome = createNativeStackNavigator();
+function HomeClient() {
+  return (
+    <StackHome.Navigator screenOptions={{ headerShown: false }}>
+      <StackHome.Screen name={"SPCUSTOMER"} component={Home} />
+      <StackHome.Screen name={"CTSPCUSTOMER"} component={ProductInfo} />
+      <StackHome.Screen name={"GH"} component={MyCart} />
+    </StackHome.Navigator>
+  );
 }
 
 const StackCart = createNativeStackNavigator();
-function HomeClient() {
+function Cart() {
   return (
     <StackCart.Navigator screenOptions={{ headerShown: false }}>
-      <StackCart.Screen name={"Trang chủ"} component={Home} />
-      <StackCart.Screen name={"Giỏ Hàng"} component={MyCart} />
-      <StackCart.Screen name={"Thanh toán"} component={Payment} />
-      <StackCart.Screen name={"Chi tiết sản phẩm"} component={ProductInfo} />
-    </StackCart.Navigator>)
+      <StackCart.Screen name={"GH"} component={MyCart} />
+      <StackCart.Screen name={"TT"} component={Payment} />
+    </StackCart.Navigator>
+  );
 }
+
+
 
 const StackOrderClient = createNativeStackNavigator();
 function OrderC() {
   return (
     <StackOrderClient.Navigator screenOptions={{ headerShown: false }}>
-      <StackOrderClient.Screen name={"Đơn hàng"} component={OrderClient} />
-      <StackOrderClient.Screen name={"Chi tiết đơn hàng"} component={OrderItemList} />
-      <StackOrderClient.Screen name={"Thanh toán"} component={PaymentOrder} />
+      <StackOrderClient.Screen name={"DHCLIENT"} component={OrderClient} />
+      <StackOrderClient.Screen name={"CTDHCLIENT"} component={OrderItemList} />
+      <StackOrderClient.Screen name={"TTCLIENT"} component={PaymentOrder} />
       <StackOrderClient.Screen name={"Nạp tiền"} component={TopupCoin} />
-    </StackOrderClient.Navigator>)
+    </StackOrderClient.Navigator>
+  );
 }
 
 const StackAccountC = createNativeStackNavigator();
 function AccountC() {
   return (
     <StackAccountC.Navigator screenOptions={{ headerShown: false }}>
-      <StackAccountC.Screen name={"Tài Khoản"} component={AccountClient} />
+      <StackAccountC.Screen name={"TKClient"} component={AccountClient} />
       <StackAccountC.Screen name={"Chỉnh sửa tài khoản"} component={EditAccount} />
       <StackAccountC.Screen name={"Đổi mật khẩu"} component={ChangePassword} />
       <StackAccountC.Screen name={"Nạp tiền"} component={TopupCoin} />
-    </StackAccountC.Navigator>)
+    </StackAccountC.Navigator>
+  );
 }
 
 const HomeTabNavigator = () => {
-
-  // const navigation = useNavigation()
-  // const auth = useSelector((state) => state.auth?.data);
-  // const token = auth?.token;
-  // const role = auth?.roleName;
-  // // debugger
-
-  // console.log(token)
-  // let date = new Date()
-
-
-
-  // useEffect(() => {
-  //   if (!auth || !token || role != "ADMIN") {
-  //     navigation.navigate("/Login")
-  //   }
-  //   if (auth) {
-  //     const decodedToken = jwtDecode(auth?.token)
-  //     if (decodedToken.exp < date.getTime() / 1000) {
-  //       navigation.navigate("/Login")
-  //     }
-  //   }
-  // }, [])
-
-
-
   return (
     <Tab.Navigator>
       <Tab.Screen
@@ -143,15 +139,7 @@ const HomeTabNavigator = () => {
           ),
         }}
       />
-      {/* <Tab.Screen
-        name="Sản Phẩm"
-        component={CP}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="shopping-bag" color={color} size={size} />
-          ),
-        }}
-      /> */}
+
       <Tab.Screen
         name="Đơn hàng"
         component={DH}
@@ -160,7 +148,8 @@ const HomeTabNavigator = () => {
             <Icon name="shopping-bag" color={color} size={size} />
           ),
         }}
-      /><Tab.Screen
+      />
+      <Tab.Screen
         name="Thống kê"
         component={Analytics}
         options={{
@@ -170,7 +159,6 @@ const HomeTabNavigator = () => {
         }}
       />
       <Tab.Screen
-
         name="Tùy Chọn"
         component={TuyChon}
         options={{
@@ -184,39 +172,8 @@ const HomeTabNavigator = () => {
 };
 
 const ClientTabNavigator = () => {
-  // const navigation = useNavigation()
-  // const auth = useSelector((state) => state.auth?.data);
-  // const token = auth?.token;
-  // const role = auth?.roleName;
-  // // debugger
-
-  // console.log(token)
-  // let date = new Date()
-
-
-
-  // useEffect(() => {
-  //   if (!auth || !token || role != "USER") {
-  //     navigation.navigate("/Login")
-  //   }
-  //   if (auth) {
-  //     const decodedToken = jwtDecode(auth?.token)
-  //     if (decodedToken.exp < date.getTime() / 1000) {
-  //       navigation.navigate("/Login")
-  //     }
-  //   }
-  // }, [])
   return (
     <Tab.Navigator>
-      {/* <Tab.Screen
-        name="Trang chủ"
-        component={Contact}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="home" color={color} size={size} />
-          ),
-        }}
-      /> */}
       <Tab.Screen
         name="Trang chủ"
         component={HomeClient}
@@ -224,7 +181,19 @@ const ClientTabNavigator = () => {
           tabBarIcon: ({ color, size }) => (
             <Icon name="home" color={color} size={size} />
           ),
+
         }}
+
+      />
+      <Tab.Screen
+        name="Giỏ hàng"
+        component={Cart}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="shopping-cart" color={color} size={size} />
+          ),
+        }}
+
       />
       <Tab.Screen
         name="Đơn hàng"
@@ -249,10 +218,6 @@ const ClientTabNavigator = () => {
 };
 
 const MainStackNavigator = () => {
-
-
-
-
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: true }} />
@@ -260,6 +225,8 @@ const MainStackNavigator = () => {
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="Home" component={HomeTabNavigator} />
       <Stack.Screen name="Client" component={ClientTabNavigator} />
+      <Stack.Screen name="Quên mật khẩu" component={ForgotPass} />
+      <Stack.Screen name="Cập nhập mật khẩu" component={ChangePassForgot} />
     </Stack.Navigator>
   );
 };

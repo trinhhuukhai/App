@@ -20,10 +20,24 @@ export const getAllCustomer = async (id) => {
     return response.data;
   } catch (error) {
     console.log(error);
-  
+
     return null;
   }
 };
+
+export const deleteCustomer = async (id) => {
+
+  try {
+    const res = await axios.delete(`http://192.168.43.199:8443/api/v1/customer/${id}`)
+
+    return res.data;
+
+  } catch (error) {
+    console.log(error);
+
+    return null;
+  }
+}
 
 
 export const getOrderByIdUser = async (id) => {
@@ -33,30 +47,30 @@ export const getOrderByIdUser = async (id) => {
     return response.data;
   } catch (error) {
     console.log(error);
-  
+
     return null;
   }
 };
 
-export const getWalletById= async (id) => {
+export const getWalletById = async (id) => {
   try {
     const response = await axios.get(`http://192.168.43.199:8443/api/v1/wallet/${id}`);
     return response.data;
   } catch (error) {
     console.log(error);
-  
+
     return null;
   }
 };
 
-export const TopupWallet = async (id,balance) => {
+export const TopupWallet = async (id, balance) => {
   try {
     const response = await axios.post(`http://192.168.43.199:8443/api/v1/wallet/${id}/top-up?balance=${balance}`);
-    
+
     return response.data;
   } catch (error) {
     console.log(error);
-  
+
     return null;
   }
 };

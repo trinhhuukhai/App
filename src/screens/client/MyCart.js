@@ -6,22 +6,20 @@ import {
   TouchableOpacity,
   Image,
   ToastAndroid,
-  FlatList
+  FlatList,
+  StyleSheet
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLOURS, Items } from '../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { deteleCart, editCart, getCartByUser, orderFormCart } from '../../redux/reducer/CartReducer';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { colors } from '../../constants';
 
 
 const MyCart = () => {
-  useEffect(() => {
-    getAllCat();
-  }, [total]);
 
   const auth = useSelector((state) => state.auth?.data);
   const userId = auth?.id;
@@ -30,84 +28,106 @@ const MyCart = () => {
   const [tax, setTax] = useState(0)
   const [isLoading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState('')
+  const isFocused = useIsFocused()
 
+  const [selectedSize, setSelectedSize] = useState('');
+  const [sizeP, setSizeP] = useState([])
+
+
+
+
+  useEffect(() => {
+    if (isFocused) {
+      getAllCat();
+    }
+  }, [isFocused]);
 
   const getAllCat = async () => {
     setLoading(true);
     const response = await getCartByUser(userId);
-    
+
     if (response.data === '') {
-      setCart(null)
-      setTax(0)
-      setTotal(0)
+      setCart(null);
+      setTax(0);
+      setTotal(0);
       setLoading(false);
     } else {
-      setCart(response.data)
-
+      setCart(response.data);
       let total = 0;
 
       if (Array.isArray(response.data)) {
-          response.data.forEach(item => {
-              total += item.price * item.quantity;
-          });
+        response.data.forEach(item => {
+          total += item.price * item.quantity;
+        });
       }
 
-      setTax(total * 0.05)
-      setTotal(total)      
+      setTax(total * 0.05);
+      setTotal(total);
       setLoading(false);
     }
   };
 
-
   const handldePlus = async (id, quantity) => {
     try {
-      let newCount = quantity + 1
-      setLoading(true)
+      let newCount = quantity + 1;
+
       const changeQ = {
-        newQuantity: newCount,
-      }
+        quantity: newCount,
+      };
 
-      editCart(id, changeQ)
-      await setQuantity(newCount) // Update quantity state variable
-      getAllCat()
+      await editCart(id, changeQ);
+      setQuantity(newCount); // Update quantity state variable
+      await getAllCat();
+
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
+  };
 
+  const changeSize = async (id, sizeName) => {
 
-  }
+    const changesize = {
+      size: sizeName,
+    };
+
+    await editCart(id, changesize);
+    await getAllCat();
+
+  };
 
   const handldeMinus = async (id, quantity) => {
-    let newCount = quantity - 1
-    setLoading(true)
+    let newCount = quantity - 1;
+
     const changeQ = {
-      newQuantity: newCount,
+      quantity: newCount,
+    };
+
+    if (newCount === 0) {
+      await deteleCart(id);
+      await getAllCat();
+    } else {
+      await editCart(id, changeQ);
+      setQuantity(newCount);
+      await getAllCat();
     }
 
-    editCart(id, changeQ)
-    await setQuantity(newCount) // Update quantity state variable
-    getAllCat()
-    setLoading(false)
-  }
+  };
 
   const handleOrder = async () => {
     try {
 
-      setLoading(true)
       const newData = {
         userId: userId,
-      }
+      };
 
-      const response = await orderFormCart(newData)
-      
-      navigation.navigate('Thanh toán', { 'payment': response })
-      getAllCat()
+      const response = await orderFormCart(newData);
+
+      navigation.navigate('TT', { 'payment': response });
+      getAllCat();
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-
-
-  }
+  };
 
 
   const navigation = useNavigation()
@@ -127,23 +147,34 @@ const MyCart = () => {
 
   const deleteC = async (id) => {
     await deteleCart(id)
-    getAllCat()
+    await getAllCat()
   }
 
+
+  const formattedAmount = (amount) => {
+    if (amount) {
+      return amount.toLocaleString('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      });
+    }
+    return '';
+  };
 
   const renderItem = ({ item }) => {
     return (
       <View
         key={item.id}
-       
+
         style={{
           // width: '100%',
-          height: 100,
+          height: 120,
           marginVertical: 6,
           flexDirection: 'row',
           alignItems: 'center',
-          paddingHorizontal:20
+          paddingHorizontal: 20
         }}>
+
         <View
           style={{
             width: '30%',
@@ -163,7 +194,7 @@ const MyCart = () => {
             // marginRight: 10
           }}
             source={{
-              uri: 'http://192.168.43.199:8443/api/v1/getFile/f8249c906e8d4aacb946b91a5c43dda2.png'
+              uri: item.product.productImage
             }}
           />
         </View>
@@ -182,7 +213,7 @@ const MyCart = () => {
                 fontWeight: '600',
                 letterSpacing: 1,
               }}>
-             {item.product.name}
+              {item.product.name}
             </Text>
             <View
               style={{
@@ -194,20 +225,48 @@ const MyCart = () => {
               <Text
                 style={{
                   fontSize: 14,
-                  fontWeight: '400',
+                  fontWeight: '500',
+                  letterSpacing: 1,
                   maxWidth: '85%',
                   marginRight: 4,
+                  marginBottom: 5
                 }}>
-                {item.product.outputPrice} VND
+                {formattedAmount(item.product.outputPrice)}
               </Text>
             </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ marginRight: 10 }}>Size:</Text>
+              {Array.isArray(item.product.sizes) && item.product.sizes.map((i) =>
+                <TouchableOpacity style={{
+                  padding: 4,
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  borderColor: 'gray',
+                  marginRight: 5,
+                  backgroundColor: item.size == i.sizeName ? "green" : 'white',
+                }}
+                  key={i.id}
+                  onPress={() => changeSize(item.id, i.sizeName)}
+                >
+                  <Text style={{
+                    fontWeight: '500',
+                    letterSpacing: 1,
+                    color: item.size == i.sizeName ? "white" : 'black',
+                  }}>{i.sizeName}</Text>
+                </TouchableOpacity>
+              )}
+
+            </View>
           </View>
+
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
+              marginTop: 5
             }}>
+
             <View
               style={{
                 flexDirection: 'row',
@@ -235,7 +294,10 @@ const MyCart = () => {
               </TouchableOpacity>
 
 
-              <Text>{item.quantity}</Text>
+              <Text style={{
+                fontWeight: '500',
+                letterSpacing: 1,
+              }}>{item.quantity}</Text>
 
               <TouchableOpacity
                 style={{
@@ -247,7 +309,7 @@ const MyCart = () => {
                   opacity: 0.5,
                 }}
                 onPress={() => handldePlus(item.id, item.quantity)}
-                >
+              >
                 <MaterialCommunityIcons
                   name="plus"
                   style={{
@@ -286,169 +348,182 @@ const MyCart = () => {
         backgroundColor: COLOURS.white,
         position: 'relative',
       }}>
-      <ScrollView>
-        <View
-          style={{
-            width: '100%',
-            flexDirection: 'row',
-            paddingTop: 16,
-            paddingHorizontal: 16,
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <MaterialCommunityIcons
-              name="chevron-left"
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={[{ key: 'content' }]}
+        keyExtractor={(item) => item.key}
+        renderItem={() => (
+          <View>
+            <View
               style={{
-                fontSize: 18,
-                color: COLOURS.backgroundDark,
-                padding: 12,
-                backgroundColor: COLOURS.backgroundLight,
-                borderRadius: 12,
-              }}
-            />
-          </TouchableOpacity>
-          <Text
-            style={{
-              fontSize: 14,
-              color: COLOURS.black,
-              fontWeight: '400',
-            }}>
-            Giỏ hàng
-          </Text>
-          <View></View>
-        </View>
-        <Text
-          style={{
-            fontSize: 20,
-            color: COLOURS.black,
-            fontWeight: '500',
-            letterSpacing: 1,
-            paddingTop: 20,
-            paddingLeft: 16,
-            marginBottom: 10,
-          }}>
-          My Cart
-        </Text>
-        <Spinner color='#00ff00' size={"large"} visible={isLoading} />
-
-        {/* <View style={{ paddingHorizontal: 16 }}>
-          {cart ? renderProducts(cart) : null}
-        </View> */}
-
-        <FlatList
-        data={cart}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
-
-
-
-
-        <View
-          style={{
-            paddingHorizontal: 16,
-            // marginVertical: 10,
-          }}>
-
-          <View
-            style={{
-              paddingHorizontal: 16,
-              marginTop: 40,
-              marginBottom: 80,
-            }}>
+                width: '100%',
+                flexDirection: 'row',
+                paddingTop: 16,
+                paddingHorizontal: 16,
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity onPress={() => navigation.navigate("SPCUSTOMER")}>
+                <MaterialCommunityIcons
+                  name="chevron-left"
+                  style={{
+                    fontSize: 18,
+                    color: COLOURS.backgroundDark,
+                    padding: 12,
+                    backgroundColor: COLOURS.backgroundLight,
+                    borderRadius: 12,
+                  }}
+                />
+              </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: COLOURS.black,
+                  fontWeight: '400',
+                }}>
+                Giỏ hàng
+              </Text>
+              <View></View>
+            </View>
             <Text
               style={{
-                fontSize: 16,
+                fontSize: 20,
                 color: COLOURS.black,
                 fontWeight: '500',
                 letterSpacing: 1,
-                marginBottom: 20,
-              }}>Thông tin đơn hàng
+                paddingTop: 20,
+                paddingLeft: 16,
+                marginBottom: 10,
+              }}>
+              My Cart
             </Text>
+            <Spinner color='#00ff00' size={"large"} visible={isLoading} />
+
+            {/* <View style={{ paddingHorizontal: 16 }}>
+          {cart ? renderProducts(cart) : null}
+        </View> */}
+
+            <FlatList
+              data={cart}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id.toString()}
+            />
+
+
+
+
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 8,
+                paddingHorizontal: 16,
+                // marginVertical: 10,
               }}>
-              <Text
+
+              <View
                 style={{
-                  fontSize: 12,
-                  fontWeight: '400',
-                  maxWidth: '80%',
-                  color: COLOURS.black,
-                  opacity: 0.5,
+                  paddingHorizontal: 16,
+                  marginTop: 40,
+                  marginBottom: 80,
                 }}>
-                Giá trị đơn hàng
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '400',
-                  color: COLOURS.black,
-                  opacity: 0.8,
-                }}>
-                {total}
-              </Text>
-            </View>
-          
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 22,
-              }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '400',
-                  maxWidth: '80%',
-                  color: COLOURS.black,
-                  opacity: 0.5,
-                }}>
-                Ship
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '400',
-                  color: COLOURS.black,
-                  opacity: 0.8,
-                }}>
-                Free ship
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: '400',
-                  maxWidth: '80%',
-                  color: COLOURS.black,
-                  opacity: 0.5,
-                }}>
-                Tổng tiền
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: '500',
-                  color: COLOURS.black,
-                }}>
-                {total}
-              </Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: COLOURS.black,
+                    fontWeight: '500',
+                    letterSpacing: 1,
+                    marginBottom: 20,
+                  }}>Thông tin đơn hàng
+                </Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 8,
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '500',
+                      letterSpacing: 1,
+                      maxWidth: '80%',
+                      color: COLOURS.black,
+                      opacity: 0.5,
+                    }}>
+                    Giá trị đơn hàng
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '500',
+                      letterSpacing: 1,
+                      color: COLOURS.black,
+                      opacity: 0.8,
+                    }}>
+                    {formattedAmount(total)}
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 22,
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '500',
+                      letterSpacing: 1,
+                      maxWidth: '80%',
+                      color: COLOURS.black,
+                      opacity: 0.5,
+                    }}>
+                    Ship
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '500',
+                      letterSpacing: 1,
+                      color: COLOURS.black,
+                      opacity: 0.8,
+                    }}>
+                    Free ship
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: '500',
+                      letterSpacing: 1,
+                      maxWidth: '80%',
+                      color: COLOURS.black,
+                      opacity: 0.5,
+                    }}>
+                    Tổng tiền
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: '500',
+                      letterSpacing: 1,
+                      color: COLOURS.black,
+                    }}>
+                    {formattedAmount(total)}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      </ScrollView>
+        )}
+      />
 
       <View
         style={{
@@ -515,4 +590,25 @@ const MyCart = () => {
   );
 };
 
+
+const styles = StyleSheet.create({
+  sizeButton: {
+    // Common style for all size buttons
+    // ...
+  },
+  selectedSizeButton: {
+    // Style for the selected size button
+    backgroundColor: 'bold background color',
+    // ...
+  },
+  sizeButtonText: {
+    // Common style for all size button texts
+    // ...
+  },
+  selectedSizeButtonText: {
+    // Style for the selected size button text
+    fontWeight: 'bold',
+    // ...
+  },
+})
 export default MyCart;

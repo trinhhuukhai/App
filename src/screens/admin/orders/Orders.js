@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, FlatList, TouchableOpacity, TouchableHighlight, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -12,7 +12,8 @@ import { colors } from '../../../constants';
 import { icons } from '../../../constants';
 import { COLOURS } from '../../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { confirmOrderStatus, getAllOrder } from '../../../redux/reducer/OrderReducer';
+import { confirmOrderStatus, getAllOrder, getOrderByTime, refundPayment } from '../../../redux/reducer/OrderReducer';
+import moment from 'moment';
 
 
 const Orders = () => {
@@ -20,10 +21,7 @@ const Orders = () => {
   const auth = useSelector((state) => state.auth?.data);
   const shopId = auth?.shopId;
   const [order, setOrder] = useState([]);
-
-  useEffect(() => {
-    getData();
-  }, []);
+  const isFocused = useIsFocused()
 
   const [isLoading, setLoading] = useState(true);
 
@@ -32,14 +30,24 @@ const Orders = () => {
   const [searchText, setSearchText] = useState('')
 
   const [filterVisible, setFilterVisible] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState("");
 
+  const formattedDate = (originalDate) => moment(originalDate).format('DD-MM-YYYY');
+
+  useEffect(() => {
+    if (isFocused) {
+      getData();
+    }
+
+  }, [isFocused]);
 
   const getData = async () => {
+    setLoading(true);
     const response = await getAllOrder(shopId);
 
     if (response === '') {
       setLoading(false);
+      setOrder([])
     } else {
       setOrder(response.data);
 
@@ -47,32 +55,62 @@ const Orders = () => {
     }
   };
 
+  const getOrderBydate = async (time) => {
+    setLoading(true);
+    const response = await getOrderByTime(time, shopId);
+    if (response === '') {
+      setLoading(false);
+    } else {
+      setOrder(response);
+
+      setLoading(false);
+    }
+  }
+
   const toggleFilter = () => {
     setFilterVisible(!filterVisible);
-    setSelectedFilter(null);
+    setSelectedFilter("");
   };
 
   const selectFilter = (filter) => {
+    setLoading(true);
     setSelectedFilter(filter);
     setFilterVisible(false);
-    getOrderByIdS(filter); // Filter the orders based on the selected status ID
+    setLoading(false);
+    getOrderBydate(filter)
   };
 
 
-  // const viewItem = () =>{
-  //     navigation.navigate('Chi tiết đơn hàng')
-  // }
 
-
-  const confirmOrder = (orderId) => {
+  const confirmOrder = async (orderId) => {
+   
     const newStatus = {
       status: "Đã xác nhận",
     }
 
-    confirmOrderStatus(orderId, newStatus)
-    getData()
+    await confirmOrderStatus(orderId, newStatus)
+   
+    await getData()
 
   }
+
+  const refund = async (orderId) => {
+   
+    await refundPayment(orderId)
+   
+    await getData()
+
+  }
+
+  const formattedAmount = (amount) => {
+    if (amount) {
+      return amount.toLocaleString('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      });
+    }
+    return '';
+  };
 
   const renderItem = ({ item }) => {
     return (
@@ -89,21 +127,22 @@ const Orders = () => {
 
         <View>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Details', { 'list': item })}
+            onPress={() => navigation.navigate('CTDH', { 'list': item })}
           >
             <View>
 
               <Text style={{
                 color: 'green',
                 fontSize: 18,
-                fontWeight: 'bold'
+                fontWeight: '500',
+                letterSpacing: 1,
               }}>{item.order.user.name}</Text>
-              <Text>{item.order.user.address}</Text>
-              <Text>{item.order.user.phone}</Text>
-              <Text>{item.status}</Text>
-              <Text>{item.paymentStatus}</Text>
-              <Text>Tổng tiền: {item.total} VND</Text>
-              <Text>{item.orderDate}</Text>
+              <Text style={styles.textInfo}>Địa chỉ: {item.order.user.address}</Text>
+              <Text style={styles.textInfo}>Số điện thoại: {item.order.user.phone}</Text>
+              <Text style={styles.textInfo}>Trạng thái: {item.status}</Text>
+              <Text style={styles.textInfo}>Thanh toán: {item.paymentStatus}</Text>
+              <Text style={styles.textInfo}>Tổng tiền: {formattedAmount(item.total)}</Text>
+              <Text style={styles.textInfo}>Ngày đặt hàng: {formattedDate(item.orderDate)}</Text>
             </View>
           </TouchableOpacity>
 
@@ -129,7 +168,8 @@ const Orders = () => {
 
               <Text style={{
                 color: 'white',
-                fontWeight: 'bold'
+                fontWeight: '500',
+                letterSpacing: 1,
               }}>Xác nhận</Text>
             </TouchableOpacity>
             :
@@ -142,18 +182,19 @@ const Orders = () => {
               padding: 8
 
             }}
-              disabled={item.paymentStatus == 'Hoàn tiền' || item.paymentStatus =="Chưa thanh toán" || item.status == "Đã xác nhận" ? true : false}
-             
+              disabled={item.paymentStatus == 'Hoàn tiền' || item.paymentStatus == "Chưa thanh toán" || item.status == "Đã xác nhận" ? true : false}
+              onPress={() => refund(item.id)}
             >
-              {item.paymentStatus == 'Hoàn tiền' || item.status == "Đã xác nhận" || item.paymentStatus =="Chưa thanh toán" ? 
-              <Text></Text>
-              :
-              <Text style={{
-                color: 'white',
-                fontWeight: 'bold'
-              }}>Hoàn tiền</Text>
+              {item.paymentStatus == 'Hoàn tiền' || item.status == "Đã xác nhận" || item.paymentStatus == "Chưa thanh toán" ?
+                <Text></Text>
+                :
+                <Text style={{
+                  color: 'white',
+                  fontWeight: '500',
+                  letterSpacing: 1,
+                }}>Hoàn tiền</Text>
               }
-              
+
 
 
             </TouchableOpacity>
@@ -167,6 +208,8 @@ const Orders = () => {
       </View>
     );
   };
+
+
 
   return (
     <View
@@ -282,42 +325,42 @@ const Orders = () => {
         <View style={styles.filterOptions}>
           <TouchableOpacity
             onPress={() => {
-              selectFilter('0')
-
+              getData()
+              setFilterVisible(false);
             }}
             style={[
               styles.filterOption,
-              selectedFilter === '1' && styles.filterOptionSelected,
+              selectedFilter === 'all' && styles.filterOptionSelected,
             ]}
           >
-            <Text>All</Text>
+            <Text>Tất cả</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => selectFilter('1')}
+            onPress={() => selectFilter('today')}
             style={[
               styles.filterOption,
-              selectedFilter === '2' && styles.filterOptionSelected,
+              selectedFilter === 'today' && styles.filterOptionSelected,
             ]}
           >
-            <Text>Pending</Text>
+            <Text>Trong ngày</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => selectFilter('2')}
+            onPress={() => selectFilter('week')}
             style={[
               styles.filterOption,
-              selectedFilter === '3' && styles.filterOptionSelected,
+              selectedFilter === 'week' && styles.filterOptionSelected,
             ]}
           >
-            <Text>Deliving</Text>
+            <Text>Trong tuần</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => selectFilter('3')}
+            onPress={() => selectFilter('month')}
             style={[
               styles.filterOption,
-              selectedFilter === '4' && styles.filterOptionSelected,
+              selectedFilter === 'month' && styles.filterOptionSelected,
             ]}
           >
-            <Text>Delived</Text>
+            <Text>Trong tháng</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -325,7 +368,7 @@ const Orders = () => {
       <Spinner color='#00ff00' size={"large"} visible={isLoading} />
 
       <FlatList
-        data={order.filter(item => item.status?.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item.status)?.toLowerCase().includes(searchText.toLowerCase()))}
+        data={order != "" && order?.filter(item => item?.status.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item?.status).toLowerCase().includes(searchText.toLowerCase()))}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
       />
@@ -382,4 +425,8 @@ const styles = StyleSheet.create({
   selectedFilterText: {
     fontWeight: 'bold',
   },
+  textInfo: {
+    fontWeight: '500',
+    letterSpacing: 1,
+  }
 })

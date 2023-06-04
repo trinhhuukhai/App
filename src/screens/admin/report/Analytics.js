@@ -1,37 +1,46 @@
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, FlatList } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import {
-    LineChart,
-    BarChart,
-    PieChart,
-    ProgressChart,
-    ContributionGraph,
-    StackedBarChart
-} from "react-native-chart-kit";
+import { BarChart } from "react-native-chart-kit";
 import { COLOURS } from '../../../database/Database';
 import { getPaymentTotal } from '../../../redux/reducer/OrderReducer';
-
+import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { Table, Row, Rows } from 'react-native-table-component';
+import moment from 'moment';
+import { ScrollView } from 'react-native-virtualized-view';
 const Analytics = () => {
-
     const auth = useSelector((state) => state.auth?.data);
     const shopId = auth?.shopId;
     const [isLoading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
     const [invest, setInvest] = useState(0);
+    const navigation = useNavigation();
+
+    const [data, setData] = useState([]);
+
+    const isFocused = useIsFocused();
+    const [dataRow, setDataRow] = useState([])
+
+
+    const tableHead = ['Ngày', 'Vốn (VND)', 'Doanh thu (VND)', 'Lợi nhuận (VND)']
 
 
     useEffect(() => {
-        getTotal();
-    }, []);
+        if (isFocused) {
+            getTotal();
+        }
+    }, [isFocused]);
 
     const getTotal = async () => {
-
         setLoading(true);
         const response = await getPaymentTotal(shopId);
-        if (response === '') {
+
+        if (response.data == "") {
+            setData(0);
+            setTotal(0);
+            setInvest(0);
             setLoading(false);
         } else {
             let total = 0;
@@ -39,45 +48,49 @@ const Analytics = () => {
             if (Array.isArray(response.data)) {
                 response.data.forEach(item => {
                     total += item.total;
-                });
-            }
-
-            if (Array.isArray(response.data)) {
-                response.data.forEach(item => {
                     von += item.invest;
                 });
             }
 
+            const convertData = response.data.map(item => {
+                const orderDate = formattedDate(item.orderDate);
+                const invest = formattedAmount(item.invest).toString();
+                const total = formattedAmount(item.total).toString();
+                const diff = formattedAmount(item.total - item.invest).toString();
+                return [orderDate, invest, total, diff];
+            });
+            setDataRow(convertData)
+            dataRow
+
+
+
+
+
+            const chartData = response.data.map(item => ({
+                label: item.orderDate,
+                value: item.total,
+            }));
+
+            setData(chartData);
             setTotal(total);
-            setInvest(von)
+            setInvest(von);
             setLoading(false);
         }
     };
 
+    const formattedAmount = (amount) => {
+        if (amount || amount === 0) {
+          return amount.toLocaleString('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+          });
+        }
+        return '0 đ';
+      };
+
+    const formattedDate = (originalDate) => moment(originalDate).format('DD-MM-YYYY');
+
     const screenWidth = Dimensions.get("window").width;
-
-    const chartConfig = {
-        backgroundGradientFrom: "#1E2923",
-        backgroundGradientFromOpacity: 0,
-        backgroundGradientTo: "#08130D",
-        backgroundGradientToOpacity: 0.5,
-        color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-        strokeWidth: 2, // optional, default 3
-        barPercentage: 0.5,
-        useShadowColorFromDataset: false // optional
-    };
-
-    const data = {
-        labels: ["January", "February", "March", "April", "May", "June"],
-        datasets: [
-            {
-                data: [20, 45, 28, 80, 99, 43],
-                color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
-                strokeWidth: 2 // optional
-            }
-        ],
-        legend: ["Rainy Days"] // optional
-    };
 
     return (
         <View
@@ -85,8 +98,8 @@ const Analytics = () => {
                 flex: 1,
                 backgroundColor: COLOURS.white,
                 position: 'relative',
-            }}>
-
+            }}
+        >
             <View
                 style={{
                     width: '100%',
@@ -94,9 +107,9 @@ const Analytics = () => {
                     paddingTop: 16,
                     paddingHorizontal: 16,
                     marginBottom: 15,
-                    // justifyContent: 'space-between',
                     alignItems: 'center',
-                }}>
+                }}
+            >
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <MaterialCommunityIcons
                         name="chevron-left"
@@ -109,51 +122,85 @@ const Analytics = () => {
                         }}
                     />
                 </TouchableOpacity>
-                <Text style={{
-                    marginLeft: 50,
-                    fontSize: 18,
-                    color: COLOURS.black,
-                    fontWeight: '500',
-                    letterSpacing: 1,
-
-
-                }}>Thống kê doanh thu</Text>
-
+                <Text
+                    style={{
+                        marginLeft: 50,
+                        fontSize: 18,
+                        color: COLOURS.black,
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}
+                >
+                    Thống kê doanh thu
+                </Text>
             </View>
-{/* 
-            <View style={{
-                padding: 10
-            }}>
-                <LineChart
-                    data={data}
-                    width={screenWidth}
-                    height={220}
-                    chartConfig={chartConfig}
-                />
-            </View> */}
-            <View style={{
-                justifyContent:'center',
-                alignContent:'center',
-                alignItems:'center',
-                marginTop:20
-            }}>
-                <Text style={{
-                    fontWeight:'bold',
-                    fontSize:18
-                }}>Tổng doanh thu: {total} VND</Text>
-                <Text style={{
-                    fontWeight:'bold',
-                    fontSize:18
-                }}>Tiền vốn: {invest} VND</Text>
-                <Text style={{
-                    fontWeight:'bold',
-                    fontSize:18
-                }}>Lợi nhuận: {total - invest} VND</Text>
-             
-            </View>
+
+
+            <ScrollView>
+                <View style={{ padding: 10 }}>
+                    <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+                        <Row
+                            data={tableHead}
+                            style={styles.head}
+                            textStyle={styles.text} // Changed from array to object
+                        />
+                        <Rows
+                            data={dataRow}
+                            textStyle={styles.text} // Changed from array to object
+                        />
+                    </Table>
+                </View>
+
+                <View
+                    style={{
+                        justifyContent: 'center',
+                        alignContent: 'center',
+                        alignItems: 'center',
+                        marginTop: 20,
+                    }}
+                >
+                    <Text style={{
+                        fontSize: 18,
+                        color: COLOURS.black,
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}>
+                        Tổng doanh thu: {formattedAmount(total)}
+                    </Text>
+                    <Text style={{
+
+                        fontSize: 18,
+                        color: COLOURS.black,
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}>
+                        Tiền vốn:  {formattedAmount(invest)}
+                    </Text>
+                    <Text style={{
+
+                        fontSize: 18,
+                        color: COLOURS.black,
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}>
+                        Lợi nhuận:  {formattedAmount(total - invest)}
+                    </Text>
+                </View>
+            </ScrollView>
 
         </View>
     );
 };
 
 export default Analytics;
+
+const styles = StyleSheet.create({
+    head: {
+        height: 60,
+        backgroundColor: '#f1f8ff',
+    },
+    text: {
+        marginVertical: 6,
+        alignSelf: 'center',
+    },
+});

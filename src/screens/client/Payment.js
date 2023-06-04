@@ -35,11 +35,20 @@ const Payment = () => {
         }
         const response = await paymentOrder(newPay)
         setMsg(response.message)
-        
+
         // navigation.goBack()
 
     }
 
+    const formattedAmount = (amount) => {
+        if (amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+            });
+        }
+        return '';
+    };
 
     return (
         <View
@@ -103,8 +112,8 @@ const Payment = () => {
                         marginBottom: 10,
                         alignItems: 'center'
                     }}>
-                        <Text style={styles.text}>Tổng tiền đơn hàng: {total} VND</Text>
-                        <Text style={styles.text}>Số dư trong ví: {wallet} VND</Text>
+                        <Text style={styles.text}>Tổng tiền đơn hàng: {formattedAmount(total)}</Text>
+                        <Text style={styles.text}>Số dư trong ví: {formattedAmount(wallet)}</Text>
                     </View>
 
 
@@ -181,6 +190,7 @@ export default Payment
 const styles = StyleSheet.create({
     text: {
         fontSize: 16,
-        fontWeight: 'bold'
+        fontWeight: '500',
+        letterSpacing: 1,
     },
 })

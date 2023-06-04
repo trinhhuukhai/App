@@ -23,7 +23,15 @@ const Details = () => {
     const route = useRoute()
     const { list } = route.params;
     // const product = list.product
-    
+    const formattedAmount = (amount) => {
+        if (amount) {
+          return amount.toLocaleString('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+          });
+        }
+        return '';
+      };
 
     const renderProducts = (data, index) => {
         return (
@@ -54,7 +62,7 @@ const Details = () => {
 
                     }}
                         source={{
-                            uri: 'http://192.168.43.199:8443/api/v1/getFile/f8249c906e8d4aacb946b91a5c43dda2.png'
+                            uri: data.product.productImage
                         }}
                     />
                 </View>
@@ -89,7 +97,7 @@ const Details = () => {
                                     maxWidth: '85%',
                                     marginRight: 4,
                                 }}>
-                                Giá: {data.product.outputPrice} VND
+                                Giá: {formattedAmount(data.product.outputPrice)}
                             </Text>
                             <Text
                                 style={{
@@ -107,7 +115,16 @@ const Details = () => {
                                     maxWidth: '85%',
                                     marginRight: 4,
                                 }}>
-                                Tổng tiền: {data.total}
+                                Size: {data.size}
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: '400',
+                                    maxWidth: '85%',
+                                    marginRight: 4,
+                                }}>
+                                Tổng tiền: {formattedAmount(data.total)}
                             </Text>
 
                         </View>

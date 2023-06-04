@@ -20,26 +20,26 @@ const PaymentOrder = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { order } = route.params;
-    const total = order.billInvoice
-    const wallet =  order.user.wallet.balance
+
+
+    const total = order?.total
+    const wallet = order?.user.wallet.balance
+    const walletId = order?.user.wallet.id
     const [message, setMsg] = useState()
 
-    
-   
+    const Wallet = () => {
+        navigation.navigate('Nạp tiền', { 'walletId': walletId })
+    }
 
-
-    // const handldePost = async () => {
-    //     const newPay = {
-    //         orderId: orderId,
-    //     }
-    //     const response = await paymentOrder(newPay)
-    //     setMsg(response.message)
-        
-       
-
-    // }
-
-
+    const formattedAmount = (amount) => {
+        if (amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+            });
+        }
+        return '';
+    };
     return (
         <View
             style={{
@@ -75,7 +75,7 @@ const PaymentOrder = () => {
                     color: COLOURS.black,
                     fontWeight: '500',
                     letterSpacing: 1,
-                    marginRight:30
+                    marginRight: 30
 
 
                 }}>Thanh toán đơn hàng</Text>
@@ -104,8 +104,8 @@ const PaymentOrder = () => {
                         marginBottom: 10,
                         alignItems: 'center'
                     }}>
-                        <Text style={styles.text}>Tổng tiền đơn hàng: {total} VND</Text>
-                        <Text style={styles.text}>Số dư trong ví: {wallet} VND</Text>
+                        <Text style={styles.text}>Tổng tiền đơn hàng: {formattedAmount(total)}</Text>
+                        <Text style={styles.text}>Số dư trong ví: {formattedAmount(wallet)}</Text>
                     </View>
 
 
@@ -122,7 +122,7 @@ const PaymentOrder = () => {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}
-                            // onPress={() => handldePost()}
+                        // onPress={() => handldePost()}
                         >
                             <Text
                                 style={{
@@ -154,6 +154,7 @@ const PaymentOrder = () => {
                                     alignItems: 'center',
                                 }}
 
+                                onPress={() =>Wallet()}
                             >
                                 <Text
                                     style={{

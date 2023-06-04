@@ -36,6 +36,42 @@ export const getReviewByProduct= async (id) => {
   }
 };
 
+export const addReview = async (review) => {
+  try {
+      const response = await axios.post("http://192.168.43.199:8443/api/v1/review/insert", review)
+      
+      return response.data;
+  } catch (error) {
+    console.log(error);
+  
+    return null;
+  }
+}
+
+export const editReviewPro = async (id,review) => {
+  try {
+      const response = await axios.put(`http://192.168.43.199:8443/api/v1/review/${id}`, review)
+      
+      return response.data;
+  } catch (error) {
+    console.log(error);
+  
+    return null;
+  }
+}
+
+export const deteleReview = async (id) => {
+  try {
+    const response = await axios.delete(`http://192.168.43.199:8443/api/v1/review/${id}`);
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  
+    return null;
+  }
+};
+
 export const getReviewById= async (id) => {
     try {
       const response = await axios.get(`http://192.168.43.199:8443/api/v1/review/${id}`);

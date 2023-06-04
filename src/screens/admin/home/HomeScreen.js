@@ -1,6 +1,6 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet, Image, TextInput, FlatList, TouchableOpacity, TouchableHighlight, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react'
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { getAllCustomer } from '../../../redux/reducer/CustomerReducer';
 import { getAllOrder, getPaymentTotal } from '../../../redux/reducer/OrderReducer';
 import { getTotalStatic } from '../../../redux/reducer/StatisReducer';
@@ -8,11 +8,13 @@ import { getProduct, getProductByShop } from '../../../redux/reducer/ProductRedu
 import Spinner from 'react-native-loading-spinner-overlay';
 import { colors } from '../../../assets';
 import { useSelector } from 'react-redux';
+import { COLOURS } from '../../../database/Database';
+
 
 const HomeScreen = () => {
 
     const [isLoading, setLoading] = useState(false);
-    const [cus, setCus] = useState();
+    const [cus, setCus] = useState(0);
     const [order, setOrder] = useState();
     const [total, setTotal] = useState(0);
     const [pro, setPro] = useState();
@@ -20,20 +22,26 @@ const HomeScreen = () => {
 
     const auth = useSelector((state) => state.auth?.data);
     const shopId = auth?.shopId;
+    const isFocused = useIsFocused()
+
 
     useEffect(() => {
-        getCus();
-        getOrder();
-        getPro();
-        getTotal();
-    }, []);
+        if (isFocused) {
+            getCus();
+            getOrder();
+            getPro();
+            getTotal();
+        }
+
+    }, [isFocused]);
 
     const getCus = async () => {
         setLoading(true);
         const response = await getAllCustomer(shopId);
-        
+
         if (response === '') {
             setLoading(false);
+            setCus(0)
         } else {
             setCus(response.count)
             setLoading(false);
@@ -53,8 +61,9 @@ const HomeScreen = () => {
 
         setLoading(true);
         const response = await getPaymentTotal(shopId);
-
-        if (response === '') {
+        
+        if (response.data == "") {
+            setTotal(0)
             setLoading(false);
         } else {
             let total = 0;
@@ -69,6 +78,7 @@ const HomeScreen = () => {
             setLoading(false);
         }
     };
+  
     const getPro = async () => {
         setLoading(true);
         const response = await getProductByShop(shopId);
@@ -81,27 +91,48 @@ const HomeScreen = () => {
         }
     };
 
+    const formattedAmount = (amount) => {
+        if (amount || amount === 0) {
+          return amount.toLocaleString('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+          });
+        }
+        return '0 đ';
+      };
+
 
     return (
-        <View style={{
-            flex: 1,
-            backgroundColor: 'white'
-        }}>
-            <Spinner color='#00ff00' size={"large"} visible={isLoading} />
-
-            <View style={{
-                width: '100%',
-                height: 50,
-                backgroundColor: colors.primary,
-                justifyContent: 'center',
-                alignItems: 'center'
+        <View
+            style={{
+                flex: 1,
+                backgroundColor: COLOURS.white,
+                position: 'relative',
             }}>
+
+            <View
+                style={{
+                    width: '100%',
+                    // flexDirection: 'row',
+                    paddingTop: 16,
+                    paddingHorizontal: 16,
+                    marginBottom: 15,
+                    // justifyContent: 'space-between',
+                    alignItems: 'center',
+                }}>
                 <Text style={{
-                    color: 'white',
-                    fontSize: 16
-                }}>K Shop</Text>
+                    // marginLeft: 60,
+                    fontSize: 18,
+                    color: COLOURS.black,
+                    fontWeight: '500',
+                    letterSpacing: 1,
+
+
+                }}>Quản lý bán hàng</Text>
+
             </View>
 
+            <Spinner color='#00ff00' size={"large"} visible={isLoading} />
 
             <View style={{
                 flexDirection: 'row',
@@ -114,8 +145,12 @@ const HomeScreen = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginVertical: 8,
+                    borderRadius: 8
                 }}>
-                    <Text>Khách hàng: {cus}</Text>
+                    <Text style={{
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}>Khách hàng: {cus}</Text>
                 </View>
                 <View style={{
                     backgroundColor: '#f9c2ff',
@@ -124,9 +159,13 @@ const HomeScreen = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginVertical: 8,
+                    borderRadius: 8
 
                 }}>
-                    <Text>Đơn hàng: {order}</Text>
+                    <Text style={{
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}>Đơn hàng: {order}</Text>
                 </View>
             </View>
 
@@ -141,9 +180,16 @@ const HomeScreen = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginVertical: 8,
+                    borderRadius: 8
                 }}>
-                    <Text>Doanh thu:</Text>
-                    <Text> {total} VND</Text>
+                    <Text style={{
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}>Doanh thu:</Text>
+                    <Text style={{
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}> {formattedAmount(total)} </Text>
                 </View>
                 <View style={{
                     backgroundColor: '#f9c2af',
@@ -152,9 +198,13 @@ const HomeScreen = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginVertical: 8,
+                    borderRadius: 8
 
                 }}>
-                    <Text>Sản phẩm: {pro}</Text>
+                    <Text style={{
+                        fontWeight: '500',
+                        letterSpacing: 1,
+                    }}>Sản phẩm: {pro}</Text>
                 </View>
             </View>
 

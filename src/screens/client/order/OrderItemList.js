@@ -11,9 +11,11 @@ import {
 } from 'react-native';
 import { COLOURS } from '../../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { getOrderItemByOId } from '../../../redux/reducer/OrderReducer';
+import moment from 'moment';
+
 
 const OrderItemList = () => {
     const [isLoading, setLoading] = useState(false);
@@ -24,15 +26,33 @@ const OrderItemList = () => {
 
     const [total, setTotal] = useState(0)
     const [tax, setTax] = useState(0)
+    const isFocused = useIsFocused()
+
+    const formattedAmount = (amount) => {
+        if (amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+            });
+        }
+        return '';
+    };
+
+    const formattedDate = (originalDate) => moment(originalDate).format('DD-MM-YYYY');
+
+
     // const product = list.product
 
     useEffect(() => {
-        getData();
-    }, []);
+        if (isFocused) {
+            getData();
+        }
+
+    }, [isFocused]);
 
     const getData = async () => {
         const response = await getOrderItemByOId(list);
-        // debugger
+
         if (response === '') {
             setOrderItem(null)
             setTax(0)
@@ -48,7 +68,7 @@ const OrderItemList = () => {
                 });
             }
 
-           
+
             setTotal(total)
             setLoading(false);
         }
@@ -61,8 +81,8 @@ const OrderItemList = () => {
                 onPress={() => navigation.navigate('ProductInfo')}
                 style={{
                     // width: '100%',
-                    height: 100,
-                    marginVertical: 6,
+                    height: 140,
+                    marginVertical: 20,
                     flexDirection: 'row',
                     alignItems: 'center',
                     paddingHorizontal: 20
@@ -70,7 +90,7 @@ const OrderItemList = () => {
                 <View
                     style={{
                         width: '30%',
-                        height: 100,
+                        height: 110,
                         padding: 14,
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -82,11 +102,10 @@ const OrderItemList = () => {
                         width: 100,
                         height: 100,
                         resizeMode: 'cover',
-                        // borderRadius: 20,
-                        // marginRight: 10
+
                     }}
                         source={{
-                            uri: 'http://192.168.43.199:8443/api/v1/getFile/f8249c906e8d4aacb946b91a5c43dda2.png'
+                            uri: item.product.productImage
                         }}
                     />
                 </View>
@@ -94,7 +113,7 @@ const OrderItemList = () => {
                     style={{
                         flex: 1,
                         height: '100%',
-                        justifyContent: 'space-around',
+                        // justifyContent: 'space-around',
                     }}>
                     <View style={{}}>
                         <Text
@@ -109,27 +128,82 @@ const OrderItemList = () => {
                         </Text>
                         <View
                             style={{
-                                marginTop: 4,
-                                flexDirection: 'row',
-                                alignItems: 'center',
+                                marginTop: 10,
+                                // flexDirection: 'row',
+                                // alignItems: 'center',
                                 opacity: 0.6,
                             }}>
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: '500',
+                                    letterSpacing: 1,
+                                    maxWidth: '85%',
+                                    marginRight: 4,
+                                }}>
+                                Giá: {formattedAmount(item.price)}
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: '500',
+                                    letterSpacing: 1,
+                                    maxWidth: '85%',
+                                    marginRight: 4,
+                                }}>
+                                Size: {item.size}
+                            </Text>
+
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: '500',
+                                    letterSpacing: 1,
+                                    maxWidth: '85%',
+                                    marginRight: 4,
+                                }}>
+                                Trạng thái: {item.status}
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: '500',
+                                    letterSpacing: 1,
+                                    maxWidth: '85%',
+                                    marginRight: 4,
+                                }}>
+                                {item.paymentStatus}
+                            </Text>
+                            <Text
+                                style={{
+                                    fontSize: 14,
+                                    fontWeight: '500',
+                                    letterSpacing: 1,
+                                    maxWidth: '85%',
+
+                                    marginRight: 4,
+
+                                }}>
+                                Số lượng: {item.quantity}
+                            </Text>
                             <Text
                                 style={{
                                     fontSize: 14,
                                     fontWeight: '400',
                                     maxWidth: '85%',
                                     marginRight: 4,
+                                    fontWeight: 'bold'
                                 }}>
-                                Giá: {item.price} VND
+                                Tổng tiền: {formattedAmount(item.total)}
                             </Text>
                         </View>
                     </View>
-                    <View
+                    {/* <View
                         style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
+                            // flexDirection: 'row',
+                            // justifyContent: 'space-between',
+                            // alignItems: 'center',
+                            marginTop: 10
                         }}>
                         <View
                             style={{
@@ -143,8 +217,20 @@ const OrderItemList = () => {
 
 
                         </View>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
 
-                    </View>
+
+                            <Text>Tổng tiền: {item.total} VND</Text>
+
+
+
+                        </View>
+
+                    </View> */}
                 </View>
             </View>
         );
@@ -233,7 +319,8 @@ const OrderItemList = () => {
                         <Text
                             style={{
                                 fontSize: 12,
-                                fontWeight: '400',
+                                fontWeight: '500',
+                                letterSpacing: 1,
                                 maxWidth: '80%',
                                 color: COLOURS.black,
                                 opacity: 0.5,
@@ -243,14 +330,15 @@ const OrderItemList = () => {
                         <Text
                             style={{
                                 fontSize: 12,
-                                fontWeight: '400',
+                                fontWeight: '500',
+                                letterSpacing: 1,
                                 color: COLOURS.black,
                                 opacity: 0.8,
                             }}>
-                            {total}
+                            {formattedAmount(total)}
                         </Text>
                     </View>
-                
+
                     <View
                         style={{
                             flexDirection: 'row',
@@ -261,7 +349,8 @@ const OrderItemList = () => {
                         <Text
                             style={{
                                 fontSize: 12,
-                                fontWeight: '400',
+                                fontWeight: '500',
+                                letterSpacing: 1,
                                 maxWidth: '80%',
                                 color: COLOURS.black,
                                 opacity: 0.5,
@@ -271,7 +360,8 @@ const OrderItemList = () => {
                         <Text
                             style={{
                                 fontSize: 12,
-                                fontWeight: '400',
+                                fontWeight: '500',
+                                letterSpacing: 1,
                                 color: COLOURS.black,
                                 opacity: 0.8,
                             }}>
@@ -287,7 +377,8 @@ const OrderItemList = () => {
                         <Text
                             style={{
                                 fontSize: 12,
-                                fontWeight: '400',
+                                fontWeight: '500',
+                                letterSpacing: 1,
                                 maxWidth: '80%',
                                 color: COLOURS.black,
                                 opacity: 0.5,
@@ -298,9 +389,10 @@ const OrderItemList = () => {
                             style={{
                                 fontSize: 18,
                                 fontWeight: '500',
+                                letterSpacing: 1,
                                 color: COLOURS.black,
                             }}>
-                            {total}
+                            {formattedAmount(total)}
                         </Text>
                     </View>
                 </View>

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
-import jwtDecode from 'jwt-decode';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux/action/AuthAction';
 import { colors } from '../assets';
-// import { MaterialIcons } from 'react-native-vector-icons';
+import { COLOURS } from '../database/Database';
+
+import Icons from 'react-native-vector-icons/Entypo';
 
 function Login() {
 
@@ -24,13 +24,13 @@ function Login() {
   // const checkLoggedInStatus = async () => {
   //   const getToken = await AsyncStorage.getItem('token')
   //   const role = await AsyncStorage.getItem('roleName')
-    
+
   //   if (!getToken && out == "") {
   //     navigation.navigate('Login');
   //     return;
   //   }
   //   const decodedToken = jwtDecode(getToken);
-    
+
   //   const isTokenExpired = decodedToken.exp < Date.now() / 1000;
   //   if (isTokenExpired) {
   //     navigation.navigate('Login');
@@ -48,6 +48,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [error, setError] = useState('');
 
 
 
@@ -57,23 +58,24 @@ function Login() {
       password: password,
     };
     setIsLoading(true);
+    { username == "" || password == "" && setError("Nhập đầy đủ thông tin") }
     await loginUser(dispatch, newUser, navigation);
     setIsLoading(false);
-  
+
   };
 
   const auth = useSelector((state) => state.auth?.data);
   const getOut = useSelector((state) => state.auth?.out);
   const out = getOut?.data
-  // const token = auth?.token;
   const role = auth?.roleName;
   const mes = auth?.message
 
-  
+
 
 
   const handleForgotPassword = () => {
     // Implement forgot password functionality here
+    navigation.navigate("Quên mật khẩu")
   }
 
   const handleRegister = () => {
@@ -88,12 +90,18 @@ function Login() {
   return (
     <View style={styles.container}>
       <Spinner color='#00ff00' size={"large"} visible={isLoading} />
-      <Text style={styles.heading}>Đăng nhập</Text>
+      <Text style={{
+        fontSize: 24,
+        color: COLOURS.black,
+        fontWeight: '500',
+        letterSpacing: 1,
+      }}>Đăng nhập</Text>
       <TextInput
         style={styles.input}
         placeholder="Tên đăng nhập"
         value={username}
         onChangeText={setUsername}
+
       />
       <View style={styles.passwordInputContainer}>
         <TextInput
@@ -103,13 +111,33 @@ function Login() {
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity style={styles.passwordVisibilityButton} onPress={togglePasswordVisibility}>
-          {/* <MaterialIcons name="add" size={24} color="black" /> */}
+        {
+          !showPassword ?
+            <TouchableOpacity style={styles.passwordVisibilityButton} onPress={() => togglePasswordVisibility()}>
+              <Icons name="eye" size={24} color="black" />
 
-        </TouchableOpacity>
+            </TouchableOpacity>
+            :
+            <TouchableOpacity style={styles.passwordVisibilityButton} onPress={() => togglePasswordVisibility()}>
+              <Icons name="eye-with-line" size={24} color="black" />
+
+            </TouchableOpacity>
+        }
+
       </View>
 
-      {mes == '' ? <Text>Dăng nhap loi</Text> : <Text>{mes}</Text>}
+      {mes == '' ? <Text>Đăng nhập không thành công !!</Text> : <Text style={{
+        color: COLOURS.black,
+        fontWeight: '500',
+        letterSpacing: 1,
+        marginBottom: 3
+      }}>{mes}</Text>}
+      {username == "" || password == "" ? <Text style={{
+        color: COLOURS.black,
+        fontWeight: '500',
+        letterSpacing: 1,
+        marginBottom: 3
+      }}>{error}</Text> : <></>}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Đăng nhập</Text>
       </TouchableOpacity>
@@ -142,8 +170,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderBottomWidth: 1,
     borderColor: colors.primary,
-   
-    
+    fontWeight: '500',
+    letterSpacing: 1,
+
+
   },
 
   passwordInputContainer: {
@@ -151,6 +181,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
   passwordInput: {
     flex: 1,
@@ -158,7 +190,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderColor: colors.primary,
- 
+    fontWeight: '500',
+    letterSpacing: 1,
+
 
   },
   passwordVisibilityButton: {
@@ -174,19 +208,29 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonText: {
-    color: '#fff',
+
     fontSize: 16,
-    fontWeight: 'bold',
+
+    color: 'white',
+    fontWeight: '500',
+    letterSpacing: 1,
+
   },
   forgotPasswordLink: {
     color: '#0080ff',
     marginTop: 10,
     textDecorationLine: 'underline',
+    color: COLOURS.black,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
   registerLink: {
     color: '#000',
     marginTop: 10,
     textDecorationLine: 'underline',
+    color: COLOURS.black,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
 });
 

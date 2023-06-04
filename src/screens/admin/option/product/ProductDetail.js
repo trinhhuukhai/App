@@ -1,15 +1,17 @@
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLOURS } from '../../../../database/Database';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import Spinner from 'react-native-loading-spinner-overlay';
+import Icons from 'react-native-vector-icons/AntDesign';
 
 import { getProductId } from '../../../../redux/reducer/ProductReducer';
 
-import { getReviewByProduct } from '../../../../redux/reducer/ReviewReducer';
+import { deteleReview, getReviewByProduct } from '../../../../redux/reducer/ReviewReducer';
 import { colors } from '../../../../assets';
 import Start from '../../../../untilies/Start';
 const ProductDetail = () => {
@@ -19,19 +21,35 @@ const ProductDetail = () => {
     const [isLoading, setLoading] = useState(false);
 
     const [product, setProduct] = useState([]);
+
     const [productImg, setProductImg] = useState([]);
     const [review, setReview] = useState([]);
+    const isFocused = useIsFocused()
+
+    const formattedAmount = (amount) => {
+        if (amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+            });
+        }
+        return '';
+    };
 
     useEffect(() => {
-        getProduct();
-        getReview()
-    }, []);
+        if (isFocused) {
+            getProduct();
+            getReview()
+        }
+
+    }, [isFocused]);
 
     const getProduct = async () => {
         setLoading(true);
         const response = await getProductId(proId);
-        // debugger
+
         if (response.data === '') {
+            setProductImg([])
             setLoading(false);
         } else {
             setProduct(response.data);
@@ -43,7 +61,7 @@ const ProductDetail = () => {
     const getReview = async () => {
         setLoading(true);
         const response = await getReviewByProduct(proId);
-        
+
         if (response.data === '') {
             setLoading(false);
         } else {
@@ -52,12 +70,13 @@ const ProductDetail = () => {
         }
     };
 
-    const renderItem = (item) => {
+
+
+    const renderItem = ({ item }) => {
         return (
             <View style={{
-                marginTop: 5
-                //  flexDirection:'row',
-                //  justifyContent:'center'
+                marginTop: 5,
+                marginRight: 10
 
             }}>
                 <Image style={{
@@ -69,7 +88,7 @@ const ProductDetail = () => {
 
                 }}
                     source={{
-                        uri: 'http://192.168.43.199:8443/api/v1/getFile/f8249c906e8d4aacb946b91a5c43dda2.png'
+                        uri: item.url
                     }}
                 />
 
@@ -97,7 +116,8 @@ const ProductDetail = () => {
                         <Text style={{
                             color: 'green',
                             fontSize: 18,
-                            fontWeight: 'bold'
+                            fontWeight: '500',
+                            letterSpacing: 1,
                         }}>{data.item.content}</Text>
                         {/* <Start numberOfStar={data.item.rating} /> */}
 
@@ -107,6 +127,25 @@ const ProductDetail = () => {
 
         </View>
     );
+
+    const deleteCat = (rowMap, rowKey) => {
+        Alert.alert(
+            'Xác nhận',
+            'Bạn có chắc chắn xóa đánh gi này?',
+            [
+                { text: 'Hủy', onPress: () => console.log('Hủy') },
+                { text: 'Xóa', onPress: () => handleDelete(rowKey) },
+            ],
+            { cancelable: false }
+        );
+    };
+
+    const handleDelete = async (rowKey) => {
+        const prevIndex = review.findIndex(item => item.id === rowKey);
+        await deteleReview(rowKey);
+
+        await getReview()
+    };
 
     const closeRow = (rowMap, rowKey) => {
         if (rowMap[rowKey]) {
@@ -119,32 +158,33 @@ const ProductDetail = () => {
             <TouchableOpacity
                 style={[styles.backRightBtn, styles.backRightBtnLeft]}
                 onPress={() => {
-                    editReview(data.item.id)
                     closeRow(rowMap, data.item.id);
+                    editReview(data.item.id)
+
                 }}
             >
-                <Text style={styles.backTextWhite}>Sửa</Text>
+                <Icons name="edit" color="blue" size={20} />
+
             </TouchableOpacity>
             <TouchableOpacity
                 style={[styles.backRightBtn, styles.backRightBtnRight]}
                 onPress={() => {
-                    deletePro(rowMap, data.item.id)
-                    closeRow(rowMap, data.item.id);
+                    deleteCat(rowMap, data.item.id)
                 }}
             >
-                <Text style={styles.backTextWhite}>Xóa</Text>
+                <Icons name="delete" color="red" size={20} />
+
             </TouchableOpacity>
         </View>
     );
 
-    const addreview = () =>{
-        navigation.navigate("Thêm đánh giá")
+    const addreview = () => {
+        navigation.navigate("THEMDG", { proId: proId })
     }
     const editReview = (reviewId) => {
-        // Navigate to the OrderDetail screen with the orderId
-        navigation.navigate('Sửa đánh giá', { id: reviewId });
-    
-      }
+        navigation.navigate('SUADG', { id: reviewId });
+
+    }
 
     return (
         <View
@@ -187,20 +227,24 @@ const ProductDetail = () => {
                 }}>Chi tiết sản phẩm</Text>
 
             </View>
+            <Spinner color='#00ff00' size={"large"} visible={isLoading} />
+
             <View style={{
                 padding: 20
             }}>
                 <Text style={{
-                    fontWeight: 'bold',
+
                     fontSize: 16,
+                    fontWeight: '500',
+                    letterSpacing: 1,
                 }}>{product.name}</Text>
-                <Text>Mô tả: {product.description}</Text>
-                <Text>Giá nhập: {product.inputPrice} VND</Text>
-                <Text>Giá bán: {product.outputPrice} VND</Text>
-                <Text>Số lượng: {product.inventory} chiếc</Text>
-                <Text>Đã bán: {product.sold} chiếc</Text>
+                <Text style={styles.text}>Mô tả: {product.description}</Text>
+                <Text style={styles.text}>Giá nhập: {formattedAmount(product.inputPrice)}</Text>
+                <Text style={styles.text}>Giá bán: {formattedAmount(product.outputPrice)}</Text>
+                <Text style={styles.text}>Số lượng: {product.inventory} chiếc</Text>
+                <Text style={styles.text}>Đã bán: {product.sold} chiếc</Text>
                 <View>
-                    <Text>Hình ảnh sản phẩm</Text>
+                    <Text style={styles.text}>Hình ảnh sản phẩm</Text>
                     <FlatList
                         horizontal={true}
                         data={productImg}
@@ -212,11 +256,12 @@ const ProductDetail = () => {
 
             </View>
             <View style={{
-                // marginTop: 20,
+               
                 marginHorizontal: 20,
             }}>
                 <Text style={{
-                    fontWeight: 'bold',
+                    fontWeight: '500',
+                    letterSpacing: 1,
                     fontSize: 16,
                 }}>Đánh giá sản phẩm</Text>
                 <View
@@ -229,9 +274,9 @@ const ProductDetail = () => {
                 />
             </View>
             <View style={{
-                // marginHorizontal:20
-                // marginTop:10,
-                marginLeft: 20
+
+                marginLeft: 20,
+                marginRight: 20
             }}>
                 <SwipeListView
 
@@ -299,10 +344,14 @@ const styles = StyleSheet.create({
     backRightBtnRight: {
         // backgroundColor: 'colors.primary',
         right: 0,
-        backgroundColor: 'red'
+        // backgroundColor: 'red'
     },
     backRightBtnLeft: {
-        backgroundColor: 'blue',
+        // backgroundColor: 'blue',
         right: 75,
     },
+    text: {
+        fontWeight: '500',
+        letterSpacing: 1,
+    }
 })

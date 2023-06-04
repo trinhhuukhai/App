@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, FlatList, TouchableOpacity, TouchableHighlight, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { colors } from '../../../../assets';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { deteleProduct, getProduct, getProductByCategory } from '../../../../redux/reducer/ProductReducer';
-import { getAllCustomer } from '../../../../redux/reducer/CustomerReducer';
+import { deleteCustomer, getAllCustomer } from '../../../../redux/reducer/CustomerReducer';
 import { icons } from '../../../../constants';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLOURS } from '../../../../database/Database';
 import { useSelector } from 'react-redux';
+import Icons from 'react-native-vector-icons/AntDesign';
+
 const Customer = () => {
 
   const [isLoading, setLoading] = useState(false);
@@ -21,27 +22,33 @@ const Customer = () => {
 
   const auth = useSelector((state) => state.auth?.data);
   const shopId = auth?.shopId;
+  const isFocused = useIsFocused()
+
 
   useEffect(() => {
-    getData();
-  }, []);
+    if (isFocused) {
+      getData();
+    }
+
+  }, [isFocused]);
 
   const getData = async () => {
     setLoading(true);
     const response = await getAllCustomer(shopId);
-
-    if (response === '') {
+    
+    if (response == null) {
       setLoading(false);
+      setCustomer([])
     } else {
       setCustomer(response.data);
       setLoading(false);
     }
   };
 
-  const deleteCat = (rowMap, rowKey) => {
+  const deleteCus = (rowMap, rowKey) => {
     Alert.alert(
       'Xác nhận',
-      'Bạn có chắc chắn xóa danh mục này?',
+      'Bạn có chắc chắn xóa khách hàng này?',
       [
         { text: 'Hủy', onPress: () => console.log('Hủy') },
         { text: 'Xóa', onPress: () => handleDelete(rowKey) },
@@ -51,20 +58,20 @@ const Customer = () => {
   };
 
   const handleDelete = async (rowKey) => {
-    const prevIndex = category.findIndex(item => item.id === rowKey);
-    await deteleCategory(rowKey);
+    const prevIndex = customer.findIndex(item => item.id === rowKey);
+    await deleteCustomer(rowKey);
 
-    getData()
+    await getData()
   };
 
   const editCate = (catId) => {
     // Navigate to the OrderDetail screen with the orderId
-    navigation.navigate('Sửa tài khoản', { id: catId });
+    navigation.navigate('EDITTK', { id: catId });
   }
 
   const addCate = () => {
     // Navigate to the OrderDetail screen with the orderId
-    navigation.navigate('Thêm tài khoản');
+    navigation.navigate('ADDTK');
   }
 
   const onRowDidOpen = rowKey => {
@@ -81,23 +88,12 @@ const Customer = () => {
           <Text style={{
             color: 'green',
             fontSize: 18,
-            fontWeight: 'bold'
+            fontWeight: '500',
+            letterSpacing: 1,
           }}>{data.item.customerName}</Text>
-          <Text style={{
-            color: 'black',
-            fontSize: 14,
-            fontWeight: 'bold'
-          }}>Số điện thoại: {data.item.phone}</Text>
-          <Text style={{
-            color: 'black',
-            fontSize: 14,
-            fontWeight: 'bold'
-          }}>Email: {data.item.email}</Text>
-          <Text style={{
-            color: 'black',
-            fontSize: 14,
-            fontWeight: 'bold'
-          }}>Địa chỉ: {data.item.address}</Text>
+          <Text style={styles.text}>Số điện thoại: {data.item.phone}</Text>
+          <Text style={styles.text}>Email: {data.item.email}</Text>
+          <Text style={styles.text}>Địa chỉ: {data.item.address}</Text>
 
         </View>
 
@@ -108,17 +104,18 @@ const Customer = () => {
 
   const renderHiddenItem = (data, rowMap) => (
     <View style={styles.rowBack}>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnLeft]}
         onPress={() => editCate(data.item.id)}
       >
         <Text style={styles.backTextWhite}>Sửa</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <TouchableOpacity
         style={[styles.backRightBtn, styles.backRightBtnRight]}
-        onPress={() => deleteCat(rowMap, data.item.id)}
+        onPress={() => deleteCus(rowMap, data.item.id)}
       >
-        <Text style={styles.backTextWhite}>Xóa</Text>
+        <Icons name="delete" color="red" size={30} />
+
       </TouchableOpacity>
     </View>
   );
@@ -225,7 +222,7 @@ const Customer = () => {
         data={customer.filter(item => item.customerName?.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item.customerName)?.toLowerCase().includes(searchText.toLowerCase()))}
         renderItem={renderItem}
         renderHiddenItem={renderHiddenItem}
-        rightOpenValue={-150}
+        rightOpenValue={-70}
         previewRowKey={'0'}
         previewOpenValue={-40}
         previewOpenDelay={3000}
@@ -297,10 +294,13 @@ const styles = StyleSheet.create({
   backRightBtnRight: {
     // backgroundColor: 'colors.primary',
     right: 0,
-    backgroundColor: 'red'
+    // backgroundColor: 'red'
   },
-  backRightBtnLeft: {
-    backgroundColor: 'blue',
-    right: 75,
-  },
+  text: {
+    color: 'black',
+    fontSize: 14,
+    fontWeight: '500',
+    letterSpacing: 1,
+  }
+
 })

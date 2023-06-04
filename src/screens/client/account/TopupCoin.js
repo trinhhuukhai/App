@@ -25,7 +25,7 @@ const TopupCoin = () => {
   const handldePost = () => {
   
     TopupWallet(walletId, coint)
-    
+    navigation.goBack()
   }
 
   return (
@@ -93,8 +93,7 @@ const TopupCoin = () => {
       <TouchableOpacity
         onPress={() => {
           handldePost()
-          Alert.alert("thanh cong")
-          navigation.goBack()
+         
         }}
         style={{
           backgroundColor: colors.primary,

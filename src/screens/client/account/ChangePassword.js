@@ -22,13 +22,14 @@ const ChangePassword = () => {
   const route = useRoute();
   const { id } = route.params;
 
-  const handldePost = () => {
+  const handldePost = async () => {
     const newCat = {
       password: newPass,
     }
 
-    changePassw(id, newCat)
-
+    await changePassw(id, newCat)
+    Alert.alert("thanh cong")
+    navigation.goBack()
 
   }
 
@@ -114,8 +115,7 @@ const ChangePassword = () => {
       <TouchableOpacity
         onPress={() => {
           handldePost()
-          Alert.alert("thanh cong")
-          navigation.goBack()
+
         }}
         style={{
           backgroundColor: colors.primary,

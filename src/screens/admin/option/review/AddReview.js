@@ -2,23 +2,31 @@ import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'reac
 import React, { useState } from 'react'
 import { colors } from '../../../../assets'
 import { addCategory } from '../../../../redux/reducer/CategoryReducer'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import { getAllCategory } from '../../../../redux/reducer/ProductReducer'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLOURS } from '../../../../database/Database'
+import { addReview } from '../../../../redux/reducer/ReviewReducer'
+import { useSelector } from 'react-redux'
 const AddReview = () => {
 
     const [content, setContent] = useState("")
-    const [start, setStar] = useState("")
     const navigation = useNavigation()
+    const route = useRoute()
+    const { proId } = route.params;
+    const auth = useSelector((state) => state.auth?.data);
+    const userId = auth?.id;
 
-    const handldePost = () => {
-        const newCat = {
-            name: name,
-        }
-        addCategory(newCat)
-
-    }
+    const postReview = async () => {
+        const newReview = {
+          content,
+          productId:proId,
+          userId
+        };
+    
+        await addReview(newReview);
+        navigation.goBack()
+      };
 
 
     const viewCate = () => {
@@ -101,9 +109,7 @@ const AddReview = () => {
 
                 onPress={() => {
 
-                    handldePost()
-                    Alert.alert("thanh cong")
-                    navigation.goBack()
+                    postReview()
                 }}
                 style={{
                     backgroundColor: colors.primary,
@@ -124,19 +130,19 @@ const AddReview = () => {
 }
 
 const styles = StyleSheet.create({
-   
+
     input: {
-      backgroundColor: colors.lightGray,
-     
-      height: 50,
-      padding: 10,
-      height: 40,
-      borderBottomWidth: 1,
-      color: 'red',
-      marginTop: 10,
-      marginBottom: 20
+        backgroundColor: colors.lightGray,
+
+        height: 50,
+        padding: 10,
+        height: 40,
+        borderBottomWidth: 1,
+        color: 'red',
+        marginTop: 10,
+        marginBottom: 20
     },
-   
-  });
+
+});
 
 export default AddReview

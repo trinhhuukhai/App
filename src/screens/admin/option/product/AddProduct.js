@@ -1,15 +1,15 @@
-import { View, Text, TextInput, ScrollView, Image, Button, TouchableOpacity, StyleSheet, ToastAndroid, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, ScrollView, Image, Button, TouchableOpacity, StyleSheet, ToastAndroid, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SelectList } from 'react-native-dropdown-select-list';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { COLOURS } from '../../../../database/Database';
 import { getAllCategory } from '../../../../redux/reducer/CategoryReducer';
 import { colors } from '../../../../constants';
-import { SelectList } from 'react-native-dropdown-select-list';
 import axios from 'axios';
 import { addProduct } from '../../../../redux/reducer/ProductReducer';
-import ImagePicker from 'react-native-image-picker';
-import { launchImageLibrary } from 'react-native-image-picker';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { COLOURS } from '../../../../database/Database';
+
 
 const AddProduct = () => {
   const [isLoading, setLoading] = useState(false);
@@ -23,6 +23,7 @@ const AddProduct = () => {
   const [inventory, setInventory] = useState('');
   const [out_price, setOutPrice] = useState('');
   const [productImage, setProductImage] = useState(null);
+  const [sizes, setSizes] = useState([]); // State to store selected sizes
 
   const navigation = useNavigation();
 
@@ -50,44 +51,55 @@ const AddProduct = () => {
     ToastAndroid.showWithGravity(msg, ToastAndroid.SHORT, ToastAndroid.CENTER)
   }
 
-
-
   const handleChoosePhoto = () => {
     let options = {
       mediaType: 'photo',
       quality: 1,
       includeBase64: true,
       maxWidth: 500,
-      maxHeight: 500
+      maxHeight: 500,
+      rotation: 0, // Set rotation to 0 to fix image rotation issue
     };
-
 
     launchImageLibrary(options, response => {
       if (response.didCancel) {
-        setToastMsg({ message: 'Cancel' })
-
+        setToastMsg('Cancel');
       } else if (response.errorCode === 'permission') {
-
-        setToastMsg('permision')
-      } else if (response.errorCode == 'others') {
-        setToastMsg(response.errorMessage)
+        setToastMsg('Permission');
+      } else if (response.errorCode === 'others') {
+        setToastMsg(response.errorMessage);
       } else if (response.assets[0].fileSize > 2097152) {
-        Alert.alert("maximun", { text: 'OK' })
-
+        Alert.alert('Maximum', 'File size should not exceed 2MB');
       } else {
         try {
-          setProductImage(response.assets[0].base64)
+          setProductImage(response.assets[0].base64);
         } catch (error) {
-          console.error('Error setting product image:', error)
+          console.error('Error setting product image:', error);
         }
-
-
       }
-    })
+    });
   };
 
 
-  const handleSubmit = () => {
+
+  const handleSizeChange = (value) => {
+    const selectedSizes = [...sizes];
+    const index = selectedSizes.indexOf(value);
+    if (index !== -1) {
+      selectedSizes.splice(index, 1); // Remove size from array if already selected
+    } else {
+      selectedSizes.push(value); // Add size to array if not selected
+    }
+    setSizes(selectedSizes);
+  };
+
+  // useEffect(() => {
+  //   console.log(sizes); // Log the updated "sizes" array whenever it changes
+  // }, [sizes]);
+
+
+
+  const handleSubmit = async () => {
     const formData = new FormData();
     formData.append('catId', catId);
     formData.append('name', name);
@@ -98,14 +110,19 @@ const AddProduct = () => {
     formData.append('inventory', inventory);
     formData.append('out_price', out_price);
     formData.append('productImage', {
-      uri: productImage.uri,
-      type: productImage.type,
-      name: productImage.fileName,
+      uri: productImage,
+      type: 'image/jpeg',
+      name: 'product.jpg',
     });
+    formData.append('sizes', JSON.stringify(sizes));
 
-    addProduct(formData)
-    navigation.goBack();
-
+    try {
+      await addProduct(formData);
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error adding product:', error);
+      // Handle error, display an alert, show a toast message, etc.
+    }
   };
 
   return (
@@ -174,6 +191,13 @@ const AddProduct = () => {
         />
         <TextInput
           onChangeText={(text) => {
+            setColor(text);
+          }}
+          style={styles.input}
+          placeholder="Màu sắc"
+        />
+        <TextInput
+          onChangeText={(text) => {
             setInventory(text);
           }}
           style={styles.input}
@@ -188,6 +212,24 @@ const AddProduct = () => {
           placeholder="Giá nhập"
           keyboardType='numeric'
         />
+        <View style={styles.checkboxContainer}>
+          <Text style={styles.checkboxLabel}>Kích thước</Text>
+          <View style={styles.checkboxGroup}>
+            <TouchableOpacity
+              style={[styles.checkbox, sizes.includes('S') && styles.checkedCheckbox]}
+              onPress={() => handleSizeChange('S')}
+            >
+              <Text style={styles.checkboxText}>S</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.checkbox, sizes.includes('M') && styles.checkedCheckbox]}
+              onPress={() => handleSizeChange('M')}
+            >
+              <Text style={styles.checkboxText}>M</Text>
+            </TouchableOpacity>
+            {/* Add more size checkboxes as needed */}
+          </View>
+        </View>
         <TextInput
           onChangeText={(text) => {
             setOutPrice(text);
@@ -212,7 +254,6 @@ const AddProduct = () => {
         <Button
           title="Thêm sản phẩm"
           onPress={() => {
-            // handle add product
             handleSubmit()
           }}
           disabled={!catId || !name || !description || !brand || !color || !inventory || !in_price || !out_price || !productImage}
@@ -226,12 +267,12 @@ const AddProduct = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLOURS.white,
+    backgroundColor: colors.white,
     position: 'relative',
   },
   inputContainer: {
     backgroundColor: colors.white,
-    borderRadius: 10,
+    // borderRadius: 10,
     padding: 20,
     marginBottom: 20,
   },
@@ -242,12 +283,9 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: colors.lightGray,
-    borderRadius: 5,
     height: 50,
     padding: 10,
-    height: 40,
     borderBottomWidth: 1,
-    color: 'red',
     marginTop: 10,
     marginBottom: 20
   },
@@ -262,6 +300,33 @@ const styles = StyleSheet.create({
     height: 100,
     resizeMode: 'cover',
     borderRadius: 10,
+  },
+
+  checkboxContainer: {
+  },
+  checkboxLabel: {
+    marginBottom: 10,
+  },
+  checkboxGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 40,
+    height: 40,
+    borderWidth: 2,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  checkedCheckbox: {
+    backgroundColor: 'green',
+  },
+  checkboxText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
   },
 });
 

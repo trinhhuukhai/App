@@ -12,28 +12,28 @@ const Option = () => {
     const navigation = useNavigation()
 
     const viewCate = () => {
-        navigation.navigate("Danh Mục");
+        navigation.navigate("DM");
     }
 
     const viewPro = () => {
-        navigation.navigate("Sản Phẩm");
+        navigation.navigate("SP");
     }
 
     const viewCus = () => {
-        navigation.navigate("Khách Hàng");
+        navigation.navigate("KH");
     }
     const viewAccount = () => {
-        navigation.navigate("Tài Khoản");
+        navigation.navigate("TKOPTION");
     }
 
     const dispatch = useDispatch()
     const auth = useSelector((state) => state.auth?.data);
     const token = auth.token
 
-    const handleLogout =  () => {
+    const handleLogout = () => {
         AsyncStorage.clear();
         logout(dispatch, token)
-        
+
         navigation.navigate('Login');
     };
 
@@ -104,6 +104,8 @@ const Option = () => {
                 <TouchableOpacity onPress={() => { viewPro() }}>
                     <Text style={{
                         marginLeft: 20,
+                        fontWeight: '500',
+                        letterSpacing: 1,
 
                     }}>Sản Phẩm</Text>
                 </TouchableOpacity>
@@ -119,13 +121,14 @@ const Option = () => {
                 <TouchableOpacity onPress={() => { viewCus() }}>
                     <Text style={{
                         marginLeft: 20,
+                        fontWeight: '500',
+                        letterSpacing: 1,
 
                     }}>Danh sách khách hàng</Text>
                 </TouchableOpacity>
 
             </View>
-
-            {/* <View style={{
+            <View style={{
                 padding: 10,
                 borderBottomWidth: 1,
                 borderBottomColor: 'black',
@@ -134,16 +137,19 @@ const Option = () => {
                 <TouchableOpacity onPress={() => { viewAccount() }}>
                     <Text style={{
                         marginLeft: 20,
+                        fontWeight: '500',
+                        letterSpacing: 1,
 
-                    }}>Tài khoản</Text>
+                    }}>Thông tin cá nhân</Text>
                 </TouchableOpacity>
 
-            </View> */}
+            </View>
+
+
 
             <View style={{
                 padding: 10,
-                // borderBottomWidth: 1,
-                // borderBottomColor: 'black',
+
                 marginHorizontal: 10,
                 marginTop: 30
             }}>
@@ -154,7 +160,9 @@ const Option = () => {
                 >
                     <Text style={{
                         marginLeft: 20,
-                        color: 'orange'
+                        color: 'orange',
+                        fontWeight: '500',
+                        letterSpacing: 1,
                     }}>Đăng xuất</Text>
                 </TouchableOpacity>
 

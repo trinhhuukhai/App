@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '../assets';
-import { SelectList } from 'react-native-dropdown-select-list'
 
-// import { MaterialIcons } from 'react-native-vector-icons/MaterialIcons';
+import { SelectList } from 'react-native-dropdown-select-list'
+import { COLOURS } from '../database/Database';
+import { useDispatch } from 'react-redux';
+import { registerUser } from '../redux/action/AuthAction';
+
+import Icons from 'react-native-vector-icons/Entypo';
 
 const Register = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch()
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -19,9 +24,12 @@ const Register = () => {
 
   const [selectedOption, setSelectedOption] = useState("");
 
+  const [error, setError] = useState('');
+
+
   const options = [
-    { key: '0', value: 'Bán hàng' },
-    { key: '1', value: 'Mua hàng' },
+    { key: '1', value: 'Bán hàng' },
+    { key: '0', value: 'Mua hàng' },
   ];
 
   const handleOptionChange = (option) => {
@@ -42,15 +50,35 @@ const Register = () => {
     setShowPassword(!showPassword);
   }
 
+
+
+  const handldePost = () => {
+    const newCat = {
+      username,
+      password,
+      name,
+      phone,
+      email,
+      address,
+      role: selectedOption
+    }
+    { username == '' || password == '' || name == '' || phone == '' || email == '' || address == '' || selectedOption == "" && setError("Nhập đầy đủ thông tin") }
+
+    registerUser(dispatch, newCat, navigation)
+
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Đăng ký tài khoản</Text>
+
       <View style={{
         justifyContent: 'center',
         // alignItems:'center',
         paddingHorizontal: 20
 
       }}>
+        {username == '' || password == '' || name == '' || phone == '' || email == '' || address == '' || selectedOption == "" ? <Text>{error}</Text> : <Text></Text>}
         <TextInput
           style={styles.input}
           placeholder="Tên đăng nhập"
@@ -66,9 +94,18 @@ const Register = () => {
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity style={styles.passwordVisibilityButton} onPress={togglePasswordVisibility}>
-            {/* <MaterialIcons name={showPassword ? 'visibility-off' : 'visibility'} size={24} color="black" /> */}
-          </TouchableOpacity>
+          {
+            !showPassword ?
+              <TouchableOpacity style={styles.passwordVisibilityButton} onPress={() => togglePasswordVisibility()}>
+                <Icons name="eye" size={24} color="black" />
+
+              </TouchableOpacity>
+              :
+              <TouchableOpacity style={styles.passwordVisibilityButton} onPress={() => togglePasswordVisibility()}>
+                <Icons name="eye-with-line" size={24} color="black" />
+
+              </TouchableOpacity>
+          }
         </View>
         <TextInput
           style={styles.input}
@@ -103,16 +140,22 @@ const Register = () => {
           selectedItem={selectedOption}
 
           placeholder={"Vai trò"}
-          style={{ width: '80%'}}
+          style={{
+            width: '80%', fontWeight: '500',
+            letterSpacing: 1,
+          }}
         />
 
       </View>
       <View style={{
-        justifyContent:'center',
-        alignItems:'center',
-        marginTop:20
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20
       }}>
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <TouchableOpacity
+          style={styles.button}
+          disabled={username == '' || password == '' || name == '' || phone == '' || email == '' || address == '' || selectedOption == ""}
+          onPress={() => handldePost()}>
           <Text style={styles.buttonText}>Đăng ký</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -137,9 +180,13 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    fontWeight: 'bold',
+
     marginBottom: 20,
-    alignSelf: 'center'
+    alignSelf: 'center',
+
+    color: COLOURS.black,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
   input: {
 
@@ -147,7 +194,9 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderColor: colors.primary
+    borderColor: colors.primary,
+    fontWeight: '500',
+    letterSpacing: 1,
 
   },
 
@@ -156,13 +205,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
   passwordInput: {
     flex: 1,
     height: 50,
     padding: 10,
     borderBottomWidth: 1,
-    borderColor: colors.primary
+    borderColor: colors.primary,
+    fontWeight: '500',
+    letterSpacing: 1,
   },
   passwordVisibilityButton: {
     padding: 10,
@@ -177,13 +230,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonText: {
-    color: '#fff',
+
     fontSize: 16,
-    fontWeight: 'bold',
+
+
+    color: 'white',
+    fontWeight: '500',
+    letterSpacing: 1,
   },
   loginLink: {
     color: '#0080ff',
     marginTop: 10,
     textDecorationLine: 'underline',
+    fontWeight: '500',
+    letterSpacing: 1,
   },
 });

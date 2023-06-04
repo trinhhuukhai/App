@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, FlatList, TouchableOpacity, TouchableHighlight, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -12,16 +12,13 @@ import { getOrderByIdUser } from '../../../redux/reducer/CustomerReducer';
 import { COLOURS } from '../../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { cancelOrder } from '../../../redux/reducer/OrderReducer';
-
+import moment from 'moment';
 
 const OrderClient = () => {
 
     const auth = useSelector((state) => state.auth?.data);
     const userId = auth?.id;
 
-    useEffect(() => {
-        getData();
-    });
 
     const [isLoading, setLoading] = useState(true);
     const [order, setOrder] = useState([]);
@@ -29,15 +26,26 @@ const OrderClient = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const [count, setCount] = useState(0)
+
     const [searchText, setSearchText] = useState('')
     const [status, setStatus] = useState('Huỷ đơn hàng')
+    const isFocused = useIsFocused()
 
+
+    useEffect(() => {
+        if (isFocused) {
+            getData();
+        }
+
+    }, [isFocused]);
 
     const getData = async () => {
+        setLoading(true);
         const response = await getOrderByIdUser(userId);
-      
+
         if (response === '') {
             setLoading(false);
+            setOrder([])
         } else {
             setOrder(response.data);
             setCount(response.count)
@@ -45,11 +53,24 @@ const OrderClient = () => {
         }
     };
 
-    const cancel = (orderId) => {
-        cancelOrder(orderId, status)
-        getData()
-    
-      }
+    const cancel = async (orderId) => {
+        await cancelOrder(orderId, status)
+        await getData()
+
+    }
+
+    const formattedAmount = (amount) => {
+        if (amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+            });
+        }
+        return '';
+    };
+
+    const formattedDate = (originalDate) => moment(originalDate).format('DD-MM-YYYY');
+
 
     // const viewItem = () =>{
     //     navigation.navigate('Chi tiết đơn hàng')
@@ -70,29 +91,33 @@ const OrderClient = () => {
 
                 <View>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('Chi tiết đơn hàng', { 'list': item.id })}
+                        onPress={() => navigation.navigate('CTDHCLIENT', { 'list': item.id })}
                     >
                         <View>
                             <Text style={{
                                 color: 'green',
                                 fontSize: 18,
-                                fontWeight: 'bold'
-                            }}>Ngày đặt hàng: {item.orderDate}</Text>
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Ngày đặt hàng: {formattedDate(item.orderDate)}</Text>
                             <Text style={{
                                 color: 'black',
                                 fontSize: 14,
-                                fontWeight: 'bold'
-                            }}>Số tiền: {item.total} VND</Text>
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Số tiền: {formattedAmount(item.total)}</Text>
                             <Text style={{
                                 color: 'black',
                                 fontSize: 14,
-                                fontWeight: 'bold'
-                            }}>{item.status}</Text>
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Trạng thái: {item.status}</Text>
                             <Text style={{
                                 color: 'black',
                                 fontSize: 14,
-                                fontWeight: 'bold'
-                            }}>{item.paymentStatus}</Text>
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Thanh toán: {item.paymentStatus}</Text>
 
                         </View>
                     </TouchableOpacity>
@@ -114,11 +139,12 @@ const OrderClient = () => {
                         padding: 8
 
                     }}
-                        onPress={() => navigation.navigate('Thanh toán',{"order":item})}
+                        onPress={() => navigation.navigate('TTCLIENT', { "order": item })}
                         disabled={item.status == "Huỷ đơn hàng" || item.paymentStatus == "Đã thanh toán" || item.paymentStatus == "Hoàn tiền"}
                     >
                         <Text style={{
-                            color: 'white'
+                            color: 'white', fontWeight: '500',
+                            letterSpacing: 1,
                         }}>Thanh toán</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={{
@@ -129,11 +155,13 @@ const OrderClient = () => {
                         alignItems: 'center',
                         padding: 8
                     }}
-                    disabled={item.status == "Huỷ đơn hàng"}
-                    onPress={() => cancel(item.id)}
+                        disabled={item.status == "Huỷ đơn hàng"}
+                        onPress={() => cancel(item.id)}
                     >
                         <Text style={{
-                            color: 'white'
+                            color: 'white',
+                            fontWeight: '500',
+                            letterSpacing: 1,
                         }}>Hủy đơn hàng</Text>
                     </TouchableOpacity>
                 </View>
@@ -141,6 +169,8 @@ const OrderClient = () => {
             </View>
         );
     };
+
+
 
     return (
         <View
@@ -232,7 +262,7 @@ const OrderClient = () => {
             <Spinner color='#00ff00' size={"large"} visible={isLoading} />
 
             <FlatList
-                data={order.filter(item => item.status?.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item.status)?.toLowerCase().includes(searchText.toLowerCase()))}
+                data={order != ""  && order.filter(item => item.status?.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item.status)?.toLowerCase().includes(searchText.toLowerCase()))}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
             />

@@ -1,19 +1,16 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import Spinner from 'react-native-loading-spinner-overlay/lib';
-import { colors } from '../../../constants';
-import images from '../../../constants';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-import { editUser, getUserById } from '../../../redux/reducer/AuthReducer';
-import { icons } from '../../../constants';
-import { COLOURS } from '../../../database/Database';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
+
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { colors } from '../../../../assets';
+import { editUser, getUserById } from '../../../../redux/reducer/AuthReducer';
+import { COLOURS } from '../../../../database/Database';
 
 
-const EditAccount = () => {
-
+const EditAcc = () => {
     const [loading, setLoading] = useState(false);
+    // const [name, setName] = useState('');
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
@@ -21,10 +18,15 @@ const EditAccount = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { id } = route.params;
+    const isFocused = useIsFocused()
+
 
     useEffect(() => {
-        getData();
-    }, [navigation]);
+        if (isFocused) {
+            getData();
+        }
+
+    }, [isFocused]);
 
     const getData = async () => {
         setLoading(true);
@@ -48,8 +50,7 @@ const EditAccount = () => {
         }
 
         await editUser(id, newCat)
-        await navigation.navigate("TKClient")
-
+        navigation.goBack()
 
     }
 
@@ -69,6 +70,7 @@ const EditAccount = () => {
                     paddingTop: 16,
                     paddingHorizontal: 16,
                     marginBottom: 15,
+                    // justifyContent: 'space-between',
                     alignItems: 'center',
                 }}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -103,9 +105,12 @@ const EditAccount = () => {
                         setName(text);
                     }}
                     style={{
+                        // backgroundColor:'red',
                         height: 40,
                         marginTop: 10,
                         borderBottomWidth: 1,
+                        // color: 'red',
+                        // marginBottom: 30
                     }}
                     value={name}
                     placeholder="Họ tên"
@@ -168,4 +173,7 @@ const EditAccount = () => {
     )
 }
 
-export default EditAccount
+
+export default EditAcc
+
+const styles = StyleSheet.create({})
