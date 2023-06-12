@@ -14,26 +14,37 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLOURS, Items } from '../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { deteleCart, editCart, getCartByUser, orderFormCart, paymentOrder } from '../../redux/reducer/CartReducer';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { colors } from '../../assets';
+import { getWalletById } from '../../redux/reducer/CustomerReducer';
 
 const Payment = () => {
     const navigation = useNavigation();
     const route = useRoute();
+    
     const { payment } = route.params;
-    const total = payment.data.total
-    const wallet = payment.data.user.wallet.balance;
-    const orderId = payment.data.id;
+    const auth = useSelector((state) => state.auth?.data);
+    const token = auth?.token
+    const total = payment.total
+    const [wallet, setWallet] = useState(0)
+
+    const walletId = payment.user.wallet.id;
+    
+    const isFocused = useIsFocused()
+
+    const orderId = payment.id;
     const [message, setMsg] = useState()
+
 
 
     const handldePost = async () => {
         const newPay = {
             orderId: orderId,
         }
-        const response = await paymentOrder(newPay)
+        const response = await paymentOrder(newPay,token)
+        
         setMsg(response.message)
 
         // navigation.goBack()
@@ -47,7 +58,23 @@ const Payment = () => {
                 currency: 'VND',
             });
         }
-        return '';
+        return '0 đ';
+    };
+
+    useEffect(() => {
+        if (isFocused) {
+
+            getWallet()
+        }
+    }, [isFocused]);
+
+    const getWallet = async () => {
+        const response = await getWalletById(walletId,token);
+
+        if (response.data === '') {
+        } else {
+            setWallet(response.data.balance)
+        }
     };
 
     return (
@@ -79,105 +106,116 @@ const Payment = () => {
                         }}
                     />
                 </TouchableOpacity>
-                <Text
-                    style={{
-                        fontSize: 14,
-                        color: COLOURS.black,
-                        fontWeight: '400',
-                    }}>
+                <Text style={{
+                    // marginLeft: 40,
+                    fontSize: 18,
+                    color: COLOURS.black,
+                    fontWeight: '500',
+                    letterSpacing: 1,
+                    marginRight: 50
 
-                </Text>
+
+                }}>Thanh toán đơn hàng</Text>
+
+
 
             </View>
 
-            {message == "Payment success" ?
-                <View style={{
-                    padding: 20, marginBottom: 10,
-                    alignItems: 'center',
-
-                }}>
-
-                    <Text style={{
-                        fontWeight: 'bold',
-                        fontSize: 16
-                    }}>Thanh toán thành công</Text>
-
-                </View>
-
-                :
-                <View style={{
-                    padding: 20
-                }}>
+            {
+                message == "Thanh toán thành công" ?
                     <View style={{
-                        marginBottom: 10,
-                        alignItems: 'center'
+                        padding: 20, marginBottom: 10,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flex: 1,
+
+
                     }}>
-                        <Text style={styles.text}>Tổng tiền đơn hàng: {formattedAmount(total)}</Text>
-                        <Text style={styles.text}>Số dư trong ví: {formattedAmount(wallet)}</Text>
+
+                        <Text style={{
+                            fontWeight: '500',
+                            letterSpacing: 1,
+                            fontSize: 16
+                        }}>Thanh toán thành công</Text>
+
                     </View>
 
+                    :
+                    <View style={{
+                        padding: 20,
+                        flex: 1,
+                        justifyContent: 'center'
+                    }}>
+                        <View style={{
+                            marginBottom: 10,
+                            alignItems: 'center'
+                        }}>
+                            <Text style={styles.text}>Tổng tiền đơn hàng: {formattedAmount(total)}</Text>
+                            <Text style={styles.text}>Số dư trong ví: {formattedAmount(wallet)}</Text>
+                        </View>
 
-                    {wallet >= total ? (
-                        <TouchableOpacity
-                            style={{
-                                // width: '86%',
-                                // height: '90%',
 
-
-                                height: 30,
-                                backgroundColor: COLOURS.blue,
-                                borderRadius: 20,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}
-                            onPress={() => handldePost()}
-                        >
-                            <Text
-                                style={{
-                                    fontSize: 12,
-                                    fontWeight: '500',
-                                    letterSpacing: 1,
-                                    color: 'white',
-                                    textTransform: 'uppercase',
-                                }}
-                            >
-                                Thanh toán
-                            </Text>
-                        </TouchableOpacity>
-                    ) : (
-                        <View>
-                            <Text style={{
-                                color: 'orange',
-                                marginBottom: 10
-                            }}>Số dư không đủ, vui lòng nạp thêm!!!</Text>
+                        {wallet >= total ? (
                             <TouchableOpacity
-                                onPress={() => navigation.navigate("Nạp tiền")}
                                 style={{
                                     // width: '86%',
                                     // height: '90%',
+
+
                                     height: 30,
-                                    backgroundColor: colors.primary,
+                                    backgroundColor: COLOURS.blue,
                                     borderRadius: 20,
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}
-
+                                onPress={() => handldePost()}
                             >
                                 <Text
                                     style={{
                                         fontSize: 12,
                                         fontWeight: '500',
                                         letterSpacing: 1,
-                                        color: COLOURS.white,
+                                        color: 'white',
                                         textTransform: 'uppercase',
                                     }}
                                 >
-                                    Nạp tiền
+                                    Thanh toán
                                 </Text>
                             </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
+                        ) : (
+                            <View>
+                                <Text style={{
+                                    color: 'orange',
+                                    marginBottom: 10
+                                }}>Số dư không đủ, vui lòng nạp thêm!!!</Text>
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('NT', { 'walletId': walletId })}
+                                    style={{
+                                        // width: '86%',
+                                        // height: '90%',
+                                        height: 30,
+                                        backgroundColor: colors.primary,
+                                        borderRadius: 20,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}
+
+                                >
+                                    <Text
+                                        style={{
+                                            fontSize: 12,
+                                            fontWeight: '500',
+                                            letterSpacing: 1,
+                                            color: COLOURS.white,
+                                            textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        Nạp tiền
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
             }
 
 

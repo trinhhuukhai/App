@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native'
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logout } from '../../../redux/action/AuthAction';
 import { useDispatch, useSelector } from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -31,7 +30,7 @@ const Option = () => {
     const token = auth.token
 
     const handleLogout = () => {
-        AsyncStorage.clear();
+
         logout(dispatch, token)
 
         navigation.navigate('Login');

@@ -43,6 +43,7 @@ const ProductInfo = () => {
 
   const auth = useSelector((state) => state.auth?.data);
   const userId = auth?.id;
+  const token = auth?.token
 
   const [product, setProduct] = useState();
   const [imageList, setImageList] = useState([]);
@@ -64,6 +65,7 @@ const ProductInfo = () => {
   const scrollX = new Animated.Value(0);
 
   let position = Animated.divide(scrollX, width);
+  const [error, setError] = useState('');
 
 
 
@@ -95,7 +97,7 @@ const ProductInfo = () => {
 
   const getAllCat = async () => {
     setLoading(true);
-    const response = await getCartByUser(userId);
+    const response = await getCartByUser(userId,token);
     if (response.data === '') {
       setCount(0)
       setLoading(false);
@@ -124,15 +126,22 @@ const ProductInfo = () => {
 
 
   const postReview = async () => {
-    const newReview = {
-      content,
-      productId,
-      userId
-    };
+    if (content === '') {
+      setError('Không được để trống !!!.');
 
-    await addReview(newReview);
-    await getReview();
-    setContent("");
+    } else {
+      const newReview = {
+        content,
+        productId,
+        userId
+      };
+
+      await addReview(newReview);
+      await getReview();
+      setContent("");
+      setError("")
+    }
+
   };
 
   const handlePost = async () => {
@@ -147,7 +156,7 @@ const ProductInfo = () => {
       size: sizes,
     };
 
-    await addToCart(newCat);
+    await addToCart(newCat,token);
 
     setLoading(true);
     getAllCat();
@@ -184,6 +193,18 @@ const ProductInfo = () => {
     await deteleReview(reviewId);
     await getReview();
   }
+
+  const comfirmDelete = (id) => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc chắn xóa đánh giá này?',
+      [
+        { text: 'Hủy', onPress: () => console.log('Hủy') },
+        { text: 'Xóa', onPress: () => handleDelete(id) },
+      ],
+      { cancelable: false }
+    );
+  };
 
   const formattedAmount = (amount) => {
     if (amount) {
@@ -334,7 +355,7 @@ const ProductInfo = () => {
                 }} onPress={() => { editReview(item.user.id), editReviewId(item.id) }}>
                   <Icons name="edit" color="blue" size={20} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                <TouchableOpacity onPress={() => comfirmDelete(item.id)}>
                   <Icon name="delete" color="red" size={20} />
                 </TouchableOpacity>
               </View>
@@ -630,6 +651,13 @@ const ProductInfo = () => {
                 </TouchableOpacity>
               </View>
               <Spinner color='#00ff00' size={"large"} visible={isLoading} />
+              {error ? <Text style={{
+                color: 'red',
+                marginBottom: 10,
+                fontWeight: '500',
+                letterSpacing: 1,
+                marginTop: 5
+              }}>{error}</Text> : null}
 
               <View style={{
                 marginBottom: 80

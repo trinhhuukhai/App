@@ -17,14 +17,17 @@ const TopupCoin = () => {
   const [loading, setLoading] = useState(false);
   // const [name, setName] = useState('');
   const [coint, setCoin] = useState('');
-
+  const auth = useSelector((state) => state.auth?.data);
+  const token = auth?.token
+ 
   const navigation = useNavigation();
   const route = useRoute();
   const { walletId } = route.params;
-
+  
+  
   const handldePost = () => {
   
-    TopupWallet(walletId, coint)
+    TopupWallet(walletId, coint, token)
     navigation.goBack()
   }
 

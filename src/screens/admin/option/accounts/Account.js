@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logout } from '../../../../redux/action/AuthAction';
 import { colors } from '../../../../assets';
 import { getUserById } from '../../../../redux/reducer/AuthReducer';
 import { COLOURS } from '../../../../database/Database';

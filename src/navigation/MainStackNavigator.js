@@ -24,7 +24,6 @@ function TuyChon() {
   return (
     <StackOption.Navigator screenOptions={{ headerShown: false }}>
       <StackOption.Screen name={"TC"} component={Option} />
-      {/* <StackOption.Screen name={"DM"} component={Cate} /> */}
       <StackOption.Screen name={"SP"} component={Prod} />
       <StackOption.Screen name={"KH"} component={Customers} />
       <StackOption.Screen name={"TKOPTION"} component={TKOWNER} />
@@ -43,17 +42,6 @@ function TKOWNER() {
   );
 }
 
-// const Stackcat = createNativeStackNavigator();
-// function Cate() {
-//   return (
-//     <Stackcat.Navigator screenOptions={{ headerShown: false }}>
-//       <Stackcat.Screen name={"Danh Mục"} component={Category} />
-//       <Stackcat.Screen name={"Thêm Danh Mục"} component={AddCategory} />
-//       <Stackcat.Screen name={"Sản Phẩm Danh Mục"} component={ProductOfCat} />
-//       <Stackcat.Screen name={"Sửa Danh Mục"} component={EditCategory} />
-//     </Stackcat.Navigator>
-//   );
-// }
 
 const Stackpro = createNativeStackNavigator();
 function Prod() {
@@ -87,6 +75,8 @@ function HomeClient() {
       <StackHome.Screen name={"SPCUSTOMER"} component={Home} />
       <StackHome.Screen name={"CTSPCUSTOMER"} component={ProductInfo} />
       <StackHome.Screen name={"GH"} component={MyCart} />
+      <StackHome.Screen name={"Pay"} component={Payment} />
+      <StackHome.Screen name={"NT"} component={TopupCoin} />
     </StackHome.Navigator>
   );
 }
@@ -96,7 +86,8 @@ function Cart() {
   return (
     <StackCart.Navigator screenOptions={{ headerShown: false }}>
       <StackCart.Screen name={"GH"} component={MyCart} />
-      <StackCart.Screen name={"TT"} component={Payment} />
+      <StackCart.Screen name={"Pay"} component={Payment} />
+      <StackCart.Screen name={"NT"} component={TopupCoin} />
     </StackCart.Navigator>
   );
 }
@@ -110,7 +101,7 @@ function OrderC() {
       <StackOrderClient.Screen name={"DHCLIENT"} component={OrderClient} />
       <StackOrderClient.Screen name={"CTDHCLIENT"} component={OrderItemList} />
       <StackOrderClient.Screen name={"TTCLIENT"} component={PaymentOrder} />
-      <StackOrderClient.Screen name={"Nạp tiền"} component={TopupCoin} />
+      <StackOrderClient.Screen name={"NT"} component={TopupCoin} />
     </StackOrderClient.Navigator>
   );
 }
@@ -220,7 +211,7 @@ const ClientTabNavigator = () => {
 const MainStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: true }} />
+      <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="Home" component={HomeTabNavigator} />

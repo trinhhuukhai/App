@@ -56,8 +56,19 @@ const OrderClient = () => {
     const cancel = async (orderId) => {
         await cancelOrder(orderId, status)
         await getData()
-
     }
+
+    const cancelO = (orderId) => {
+        Alert.alert(
+          'Xác nhận',
+          'Bạn có chắc chắn hủy đơn hàng này?',
+          [
+            { text: 'Hủy', onPress: () => console.log('Hủy') },
+            { text: 'Xác nhận', onPress: () => cancel(orderId) },
+          ],
+          { cancelable: false }
+        );
+      };
 
     const formattedAmount = (amount) => {
         if (amount) {
@@ -142,10 +153,22 @@ const OrderClient = () => {
                         onPress={() => navigation.navigate('TTCLIENT', { "order": item })}
                         disabled={item.status == "Huỷ đơn hàng" || item.paymentStatus == "Đã thanh toán" || item.paymentStatus == "Hoàn tiền"}
                     >
-                        <Text style={{
-                            color: 'white', fontWeight: '500',
-                            letterSpacing: 1,
-                        }}>Thanh toán</Text>
+
+
+                        {item.paymentStatus != "Chưa thanh toán" ?
+                            <Text style={{
+                                color: 'orange',
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Thanh toán</Text>
+                            :
+                            <Text style={{
+                                color: 'white',
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Thanh toán</Text>
+                        }
+
                     </TouchableOpacity>
                     <TouchableOpacity style={{
                         // height: 30,
@@ -156,13 +179,22 @@ const OrderClient = () => {
                         padding: 8
                     }}
                         disabled={item.status == "Huỷ đơn hàng"}
-                        onPress={() => cancel(item.id)}
+                        onPress={() => cancelO(item.id)}
                     >
-                        <Text style={{
-                            color: 'white',
-                            fontWeight: '500',
-                            letterSpacing: 1,
-                        }}>Hủy đơn hàng</Text>
+                       
+                       {item.status == "Huỷ đơn hàng" ?
+                            <Text style={{
+                                color: 'orange',
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Huỷ đơn hàng</Text>
+                            :
+                            <Text style={{
+                                color: 'white',
+                                fontWeight: '500',
+                                letterSpacing: 1,
+                            }}>Huỷ đơn hàng</Text>
+                        }
                     </TouchableOpacity>
                 </View>
 
@@ -262,7 +294,7 @@ const OrderClient = () => {
             <Spinner color='#00ff00' size={"large"} visible={isLoading} />
 
             <FlatList
-                data={order != ""  && order.filter(item => item.status?.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item.status)?.toLowerCase().includes(searchText.toLowerCase()))}
+                data={order != "" && order.filter(item => item.status?.toLowerCase().includes(searchText.toLowerCase()) || JSON.stringify(item.status)?.toLowerCase().includes(searchText.toLowerCase()))}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
             />

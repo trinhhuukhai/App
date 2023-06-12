@@ -7,13 +7,13 @@ import {
   Image,
   ToastAndroid,
   FlatList,
-  StyleSheet
+  StyleSheet,
+  Alert
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLOURS, Items } from '../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { deteleCart, editCart, getCartByUser, orderFormCart } from '../../redux/reducer/CartReducer';
-import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { colors } from '../../constants';
@@ -23,6 +23,8 @@ const MyCart = () => {
 
   const auth = useSelector((state) => state.auth?.data);
   const userId = auth?.id;
+  const token = auth?.token
+
   const [cart, setCart] = useState([])
   const [total, setTotal] = useState(0)
   const [tax, setTax] = useState(0)
@@ -30,9 +32,8 @@ const MyCart = () => {
   const [quantity, setQuantity] = useState('')
   const isFocused = useIsFocused()
 
-  const [selectedSize, setSelectedSize] = useState('');
-  const [sizeP, setSizeP] = useState([])
 
+  const [payment, setPayment] = useState([])
 
 
 
@@ -44,7 +45,7 @@ const MyCart = () => {
 
   const getAllCat = async () => {
     setLoading(true);
-    const response = await getCartByUser(userId);
+    const response = await getCartByUser(userId,token);
 
     if (response.data === '') {
       setCart(null);
@@ -75,7 +76,7 @@ const MyCart = () => {
         quantity: newCount,
       };
 
-      await editCart(id, changeQ);
+      await editCart(id, changeQ,token);
       setQuantity(newCount); // Update quantity state variable
       await getAllCat();
 
@@ -90,7 +91,7 @@ const MyCart = () => {
       size: sizeName,
     };
 
-    await editCart(id, changesize);
+    await editCart(id, changesize,token);
     await getAllCat();
 
   };
@@ -103,54 +104,50 @@ const MyCart = () => {
     };
 
     if (newCount === 0) {
-      await deteleCart(id);
+      await deteleCart(id,token);
       await getAllCat();
     } else {
-      await editCart(id, changeQ);
+      await editCart(id, changeQ,token);
       setQuantity(newCount);
       await getAllCat();
     }
 
   };
 
+  const navigation = useNavigation();
+
   const handleOrder = async () => {
     try {
-
       const newData = {
         userId: userId,
       };
 
-      const response = await orderFormCart(newData);
+      const response = await orderFormCart(newData, token);
+      setPayment(response.data);
 
-      navigation.navigate('TT', { 'payment': response });
-      getAllCat();
+      // Navigate to the payment screen
+      navigation.navigate('Pay', { "payment": response.data });
     } catch (error) {
       console.log(error);
     }
   };
 
-
-  const navigation = useNavigation()
-  //checkout
-
-  const checkOut = async () => {
-    try {
-      await AsyncStorage.removeItem('cartItems');
-    } catch (error) {
-      return error;
-    }
-
-    ToastAndroid.show('Items will be Deliverd SOON!', ToastAndroid.SHORT);
-
-    navigation.navigate('Home');
-  };
-
   const deleteC = async (id) => {
-    await deteleCart(id)
+    await deteleCart(id,token)
     await getAllCat()
   }
 
-
+  const comfirmDelete = (id) => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc chắn xóa sản phẩm này?',
+      [
+        { text: 'Hủy', onPress: () => console.log('Hủy') },
+        { text: 'Xóa', onPress: () => deleteC(id) },
+      ],
+      { cancelable: false }
+    );
+  };
   const formattedAmount = (amount) => {
     if (amount) {
       return amount.toLocaleString('vi-VN', {
@@ -158,16 +155,14 @@ const MyCart = () => {
         currency: 'VND',
       });
     }
-    return '';
+    return '0 đ';
   };
-
   const renderItem = ({ item }) => {
     return (
       <View
         key={item.id}
 
         style={{
-          // width: '100%',
           height: 120,
           marginVertical: 6,
           flexDirection: 'row',
@@ -190,8 +185,6 @@ const MyCart = () => {
             width: 100,
             height: 100,
             resizeMode: 'cover',
-            // borderRadius: 20,
-            // marginRight: 10
           }}
             source={{
               uri: item.product.productImage
@@ -321,7 +314,7 @@ const MyCart = () => {
 
 
             </View>
-            <TouchableOpacity onPress={() => deleteC(item.id)}>
+            <TouchableOpacity onPress={() => comfirmDelete(item.id)}>
               <MaterialCommunityIcons
                 name="delete-outline"
                 style={{
@@ -559,7 +552,9 @@ const MyCart = () => {
         </TouchableOpacity>
           :
           <TouchableOpacity
-            onPress={() => handleOrder()}
+            onPress={() =>
+              handleOrder()
+            }
             style={{
               width: '86%',
               height: '90%',
@@ -590,25 +585,4 @@ const MyCart = () => {
   );
 };
 
-
-const styles = StyleSheet.create({
-  sizeButton: {
-    // Common style for all size buttons
-    // ...
-  },
-  selectedSizeButton: {
-    // Style for the selected size button
-    backgroundColor: 'bold background color',
-    // ...
-  },
-  sizeButtonText: {
-    // Common style for all size button texts
-    // ...
-  },
-  selectedSizeButtonText: {
-    // Style for the selected size button text
-    fontWeight: 'bold',
-    // ...
-  },
-})
 export default MyCart;

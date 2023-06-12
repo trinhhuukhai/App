@@ -9,7 +9,6 @@ import { getUserById } from '../../../redux/reducer/AuthReducer';
 import { icons } from '../../../constants';
 import { COLOURS } from '../../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logout } from '../../../redux/action/AuthAction';
 import { getWalletById } from '../../../redux/reducer/CustomerReducer';
 
@@ -53,7 +52,7 @@ const AccountClient = () => {
     // }, [isFocused]);
 
     const getWallet = async () => {
-        const response = await getWalletById(walletId);
+        const response = await getWalletById(walletId,token);
         
         setLoading(true);
         if (response.data === '') {
@@ -77,7 +76,7 @@ const AccountClient = () => {
     }
 
     const handleLogout = () => {
-        AsyncStorage.clear();
+      
         logout(dispatch, token)
 
         navigation.navigate('Login');
@@ -90,7 +89,7 @@ const AccountClient = () => {
                 currency: 'VND',
             });
         }
-        return '0đ';
+        return '0 đ';
     };
 
     return (

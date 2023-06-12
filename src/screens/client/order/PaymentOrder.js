@@ -11,24 +11,61 @@ import {
     Alert
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { COLOURS } from '../../../database/Database';
 import { colors } from '../../../assets';
+import { paymentOrder } from '../../../redux/reducer/CartReducer';
+import { getWalletById } from '../../../redux/reducer/CustomerReducer';
+import { useSelector } from 'react-redux';
 
 
 const PaymentOrder = () => {
     const navigation = useNavigation();
     const route = useRoute();
     const { order } = route.params;
+    const isFocused = useIsFocused()
+    const auth = useSelector((state) => state.auth?.data);
+    const token = auth?.token
+    const [wallet, setWallet] = useState(0)
+
+    const orderId = order?.id
 
 
     const total = order?.total
-    const wallet = order?.user.wallet.balance
+
+
     const walletId = order?.user.wallet.id
+
+
     const [message, setMsg] = useState()
 
-    const Wallet = () => {
-        navigation.navigate('Nạp tiền', { 'walletId': walletId })
+    useEffect(() => {
+        if (isFocused) {
+
+            getWallet()
+        }
+    }, [isFocused]);
+
+    const getWallet = async () => {
+        const response = await getWalletById(walletId,token);
+        
+        if (response.data === '') {
+        } else {
+            setWallet(response.data.balance)
+        }
+    };
+
+
+
+    const handldePost = async () => {
+        const newPay = {
+            orderId: orderId,
+        }
+        const response = await paymentOrder(newPay,token)
+        setMsg(response.message)
+
+        // navigation.goBack()
+
     }
 
     const formattedAmount = (amount) => {
@@ -38,8 +75,10 @@ const PaymentOrder = () => {
                 currency: 'VND',
             });
         }
-        return '';
+        return '0 đ';
     };
+
+
     return (
         <View
             style={{
@@ -82,15 +121,19 @@ const PaymentOrder = () => {
 
             </View>
 
-            {message == "Payment success" ?
+            {message == "Thanh toán thành công" ?
                 <View style={{
                     padding: 20, marginBottom: 10,
                     alignItems: 'center',
+                    justifyContent: 'center',
+                    flex: 1,
+                    // backgroundColor: 'red'
 
                 }}>
 
                     <Text style={{
-                        fontWeight: 'bold',
+                        fontWeight: '500',
+                        letterSpacing: 1,
                         fontSize: 16
                     }}>Thanh toán thành công</Text>
 
@@ -98,7 +141,9 @@ const PaymentOrder = () => {
 
                 :
                 <View style={{
-                    padding: 20
+                    padding: 20,
+                    flex:1,
+                    justifyContent:'center'
                 }}>
                     <View style={{
                         marginBottom: 10,
@@ -122,7 +167,7 @@ const PaymentOrder = () => {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}
-                        // onPress={() => handldePost()}
+                            onPress={() => handldePost()}
                         >
                             <Text
                                 style={{
@@ -154,7 +199,7 @@ const PaymentOrder = () => {
                                     alignItems: 'center',
                                 }}
 
-                                onPress={() =>Wallet()}
+                                onPress={() => navigation.navigate('NT', { 'walletId': walletId })}
                             >
                                 <Text
                                     style={{

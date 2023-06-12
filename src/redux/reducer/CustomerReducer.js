@@ -52,9 +52,13 @@ export const getOrderByIdUser = async (id) => {
   }
 };
 
-export const getWalletById = async (id) => {
+export const getWalletById = async (id, token) => {
   try {
-    const response = await axios.get(`http://192.168.43.199:8443/api/v1/wallet/${id}`);
+    const response = await axios.get(`http://192.168.43.199:8443/api/v1/wallet/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -63,14 +67,21 @@ export const getWalletById = async (id) => {
   }
 };
 
-export const TopupWallet = async (id, balance) => {
+export const TopupWallet = async (id, balance, token) => {
   try {
-    const response = await axios.post(`http://192.168.43.199:8443/api/v1/wallet/${id}/top-up?balance=${balance}`);
-
+    const response = await axios.post(
+      `http://192.168.43.199:8443/api/v1/wallet/${id}/top-up?balance=${balance}`,
+      null,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+   
     return response.data;
   } catch (error) {
     console.log(error);
-
     return null;
   }
 };

@@ -75,7 +75,7 @@ const Customer = () => {
   }
 
   const onRowDidOpen = rowKey => {
-    console.log('This row opened', rowKey);
+    // console.log('This row opened', rowKey);
   };
 
   const renderItem = data => (

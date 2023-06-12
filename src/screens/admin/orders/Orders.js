@@ -83,21 +83,21 @@ const Orders = () => {
 
 
   const confirmOrder = async (orderId) => {
-   
+
     const newStatus = {
       status: "Đã xác nhận",
     }
 
     await confirmOrderStatus(orderId, newStatus)
-   
+
     await getData()
 
   }
 
   const refund = async (orderId) => {
-   
+
     await refundPayment(orderId)
-   
+
     await getData()
 
   }
@@ -186,7 +186,11 @@ const Orders = () => {
               onPress={() => refund(item.id)}
             >
               {item.paymentStatus == 'Hoàn tiền' || item.status == "Đã xác nhận" || item.paymentStatus == "Chưa thanh toán" ?
-                <Text></Text>
+                <Text style={{
+                  color: 'orange',
+                  fontWeight: '500',
+                  letterSpacing: 1,
+                }}>{item.paymentStatus}</Text>
                 :
                 <Text style={{
                   color: 'white',

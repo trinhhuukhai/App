@@ -8,7 +8,6 @@ import {
     ToastAndroid,
     StyleSheet
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLOURS, Items } from '../../../database/Database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { deteleCart, editCart, getCartByUser, orderFormCart } from '../../redux/reducer/CartReducer';

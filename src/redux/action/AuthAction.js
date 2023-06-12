@@ -1,23 +1,6 @@
 import axios from 'axios';
 import { loginError, loginStart, loginSuccess, logoutError, logoutStart, logoutSuccess, registerError, registerStart, registerSuccess } from '../slice/authSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// const instance = axios.create({
-//     baseURL: 'http://192.168.43.199:8443/api/v1'
-// });
-
-
-
-// export const loginAccount = () => async (dispatch, data) => {
-//     dispatch(loginStart());
-
-//     try {
-//         const response = await instance.post('/login', data);
-//         dispatch(fetchUsersSuccess(response.data));
-//     } catch (error) {
-//         dispatch(fetchUsersError(error.message));
-//     }
-// };x
 
 
 export const loginUser = async (dispatch, user, navigation) => {
@@ -31,8 +14,7 @@ export const loginUser = async (dispatch, user, navigation) => {
         let mes = response.data.message
 
 
-        AsyncStorage.setItem('token', token)
-        AsyncStorage.setItem('roleName', role)
+       
         if (mes == "Đăng nhập lỗi") {
             navigation.navigate('Login')
             return

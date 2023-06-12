@@ -7,27 +7,27 @@ import jwtDecode from 'jwt-decode';
 
 const Welcome = () => {
 
-  useEffect(() => {
-    // check if user is already logged in
-    checkLoggedInStatus();
-  });
+  // useEffect(() => {
+  //   // check if user is already logged in
+  //   checkLoggedInStatus();
+  // });
 
-  const checkLoggedInStatus = async () => {
-    const token = await AsyncStorage.getItem('auth_token');
-    if (!token) {
-      navigation.navigate('Login');
-      return;
-    }
-    const decodedToken = jwtDecode(token);
-    const isTokenExpired = decodedToken.exp < Date.now() / 1000;
-    console.log(isTokenExpired)
-    if (isTokenExpired) {
-      // handle expired token
-      navigation.navigate('Login');
-    } else {
-      navigation.navigate('Home');
-    }
-  };
+  // const checkLoggedInStatus = async () => {
+  //   const token = await AsyncStorage.getItem('auth_token');
+  //   if (!token) {
+  //     navigation.navigate('Login');
+  //     return;
+  //   }
+  //   const decodedToken = jwtDecode(token);
+  //   const isTokenExpired = decodedToken.exp < Date.now() / 1000;
+  //   console.log(isTokenExpired)
+  //   if (isTokenExpired) {
+  //     // handle expired token
+  //     navigation.navigate('Login');
+  //   } else {
+  //     navigation.navigate('Home');
+  //   }
+  // };
 
   const navigation = useNavigation();
 

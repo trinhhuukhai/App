@@ -109,7 +109,7 @@ const ChangePass = () => {
         <TouchableOpacity
           onPress={() => {
             handldePost()
-            Alert.alert("thanh cong")
+            Alert.alert("Đổi mạt khẩu thành công")
             navigation.goBack()
           }}
           style={{

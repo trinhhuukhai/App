@@ -28,7 +28,7 @@ const ChangePassword = () => {
     }
 
     await changePassw(id, newCat)
-    Alert.alert("thanh cong")
+    Alert.alert("Đổi mật khẩu thành công")
     navigation.goBack()
 
   }

@@ -113,7 +113,7 @@ export const cancelOrder = async (id,status) => {
 
 export const refundPayment = async (id) => {
   try {
-    const response = await axios.put(`http://192.168.43.199:8443/api/v1/orderItem/{id}/refund?status=Hoàn tiền`);
+    const response = await axios.put(`http://192.168.43.199:8443/api/v1/orderItem/${id}/refund?status=Hoàn tiền`);
     
     return response.data;
   } catch (error) {
